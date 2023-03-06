@@ -18,11 +18,11 @@ jobs:
             -   name: Install native Rust toolchain, Valgrind, and build utilities
                 run: |
                     # sudo apt-get purge grub\*
-                    sudo apt-get --only-upgrade install grub-efi-amd64-signed
-                    sudo apt-get autoremove
-                    sudo update-grub
+                    # sudo apt-get --only-upgrade install grub-efi-amd64-signed
+                    # sudo apt-get autoremove
+                    # sudo update-grub
                     sudo apt-get update
-                    sudo apt-get -y upgrade
+                    # sudo apt-get -y upgrade
                     sudo apt-get -y install cargo valgrind lld git g++ clang curl
             -   name: Install Dependencies
                 uses: ./.github/actions/install-dependencies
