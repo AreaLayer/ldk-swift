@@ -19,6 +19,28 @@ enum InvalidSerializedDataError: Error {
     case badNodeSecret
 }
 
+public struct ChannelManagerConstructionParameters {
+    var config: UserConfig
+    var entropySource: EntropySource
+    var nodeSigner: NodeSigner
+    var signerProvider: SignerProvider
+    var feeEstimator: FeeEstimator
+    var chainMonitor: ChainMonitor
+    var txBroadcaster: BroadcasterInterface
+    var enableP2PGossip: Bool = false
+    var scorer: MultiThreadedLockableScore?
+    var payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))
+    var logger: Logger
+    
+    fileprivate func router(networkGraph: NetworkGraph?) -> Router {
+        if let netGraph = networkGraph, let scorer = self.scorer {
+            return DefaultRouter(networkGraph: netGraph, logger: self.logger, randomSeedBytes: self.entropySource.getSecureRandomBytes(), scorer: scorer.asLockableScore()).asRouter()
+        }
+        // TODO: figure out better way of returning router instance
+        return Router()
+    }
+}
+
 public class ChannelManagerConstructor: NativeTypeWrapper {
 
 
@@ -32,15 +54,18 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
 
     public let channel_manager_latest_block_hash: [UInt8]?
 
-    let logger: Logger
+    private let constructionParameters: ChannelManagerConstructionParameters
+    
     fileprivate var customPersister: CustomChannelManagerPersister?
     fileprivate var customEventHandler: EventHandler?
     public private(set) var netGraph: NetworkGraph?
     fileprivate var graphMessageHandler: GossipSync?
-    fileprivate var scorer: MultiThreadedLockableScore?
-    fileprivate let keysInterface: KeysInterface!
-    public private(set) var payer: InvoicePayer?
-    fileprivate var payerRetries: Retry!
+    
+    
+    
+    
+    // public private(set) var payer: InvoicePayer?
+    
     public let peerManager: PeerManager
     private var tcpPeerHandler: TCPPeerHandler?
 
@@ -52,18 +77,18 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
      */
     public private(set) var channel_monitors: [(ChannelMonitor, [UInt8])]
 
-    private let chain_monitor: ChainMonitor
 
+    public init(channelManagerSerialized: [UInt8], channelMonitorsSerialized: [[UInt8]], netGraphSerialized: [UInt8]?, filter: Filter?, params: ChannelManagerConstructionParameters) throws {
 
-    public init(channelManagerSerialized: [UInt8], channelMonitorsSerialized: [[UInt8]], keysInterface: KeysInterface, feeEstimator: FeeEstimator, chainMonitor: ChainMonitor, filter: Filter?, netGraphSerialized: [UInt8]?, txBroadcaster: BroadcasterInterface, logger: Logger, enableP2PGossip: Bool = false, userConfig: UserConfig = UserConfig.initWithDefault(), payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))) throws {
-
+        self.constructionParameters = params
+        
         var monitors: [ChannelMonitor] = []
         self.channel_monitors = []
 
         var monitorFundingSet = Set<String>()
 
         for currentSerializedChannelMonitor in channelMonitorsSerialized {
-            let channelMonitorResult: Result_C2Tuple_BlockHashChannelMonitorZDecodeErrorZ = Bindings.readBlockHashChannelMonitor(ser: currentSerializedChannelMonitor, arg: keysInterface)
+            let channelMonitorResult: Result_C2Tuple_BlockHashChannelMonitorZDecodeErrorZ = Bindings.readBlockHashChannelMonitor(ser: currentSerializedChannelMonitor, argA: params.entropySource, argB: params.signerProvider)
 
             guard let (blockHash, channelMonitor) = channelMonitorResult.getValue() else {
                 throw InvalidSerializedDataError.invalidSerializedChannelMonitor
@@ -84,7 +109,18 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
         }
 
         print("Collected channel monitors, reading channel manager")
-        let channelManagerReadArgs = ChannelManagerReadArgs(keysManager: keysInterface, feeEstimator: feeEstimator, chainMonitor: chainMonitor.asWatch(), txBroadcaster: txBroadcaster, logger: logger, defaultConfig: userConfig, channelMonitors: monitors)
+        
+        if let serializedNetworkGraph = netGraphSerialized {
+            let netGraphResult = NetworkGraph.read(ser: serializedNetworkGraph, arg: params.logger)
+            if !netGraphResult.isOk(){
+                throw InvalidSerializedDataError.invalidSerializedNetworkGraph
+            }
+            self.netGraph = netGraphResult.getValue()
+        }
+        
+        // TODO: figure out better way to obtain a router
+        let router = params.router(networkGraph: self.netGraph)
+        let channelManagerReadArgs = ChannelManagerReadArgs(entropySource: params.entropySource, nodeSigner: params.nodeSigner, signerProvider: params.signerProvider, feeEstimator: params.feeEstimator, chainMonitor: params.chainMonitor.asWatch(), txBroadcaster: params.txBroadcaster, router: router, logger: params.logger, defaultConfig: params.config, channelMonitors: monitors)
 
         guard let (latestBlockHash, channelManager) = Bindings.readBlockHashChannelManager(ser: channelManagerSerialized, arg: channelManagerReadArgs).getValue() else {
             throw InvalidSerializedDataError.invalidSerializedChannelManager
@@ -97,35 +133,21 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
 
         self.channelManager = channelManager
         self.channel_manager_latest_block_hash = latestBlockHash
-        self.chain_monitor = chainMonitor
-        self.keysInterface = keysInterface
-		self.payerRetries = payerRetries
-        self.logger = logger
 
-        let random_data = keysInterface.getSecureRandomBytes();
+        let random_data = params.entropySource.getSecureRandomBytes();
 
-        if let serializedNetworkGraph = netGraphSerialized {
-            let netGraphResult = NetworkGraph.read(ser: serializedNetworkGraph, arg: self.logger)
-            if !netGraphResult.isOk(){
-                throw InvalidSerializedDataError.invalidSerializedNetworkGraph
-            }
-            self.netGraph = netGraphResult.getValue()
-        }
 
         let noCustomMessages = IgnoringMessageHandler()
         var messageHandler: MessageHandler!
-        if let netGraph = netGraph, enableP2PGossip {
-            let p2pGossipSync = P2PGossipSync(networkGraph: netGraph, chainAccess: nil, logger: logger)
+        if let netGraph = netGraph, params.enableP2PGossip {
+            let p2pGossipSync = P2PGossipSync(networkGraph: netGraph, utxoLookup: nil, logger: params.logger)
             self.graphMessageHandler = GossipSync.initWithP2P(a: p2pGossipSync)
             messageHandler = MessageHandler(chanHandlerArg: channelManager.asChannelMessageHandler(), routeHandlerArg: p2pGossipSync.asRoutingMessageHandler(), onionMessageHandlerArg: noCustomMessages.asOnionMessageHandler())
         } else {
             messageHandler = MessageHandler(chanHandlerArg: channelManager.asChannelMessageHandler(), routeHandlerArg: noCustomMessages.asRoutingMessageHandler(), onionMessageHandlerArg: noCustomMessages.asOnionMessageHandler())
         }
-        guard let nodeSecret = keysInterface.getNodeSecret(recipient: .Node).getValue() else {
-            throw InvalidSerializedDataError.badNodeSecret
-        }
         let timestampSeconds = UInt32(NSDate().timeIntervalSince1970)
-        self.peerManager = PeerManager(messageHandler: messageHandler, ourNodeSecret: nodeSecret, currentTime: timestampSeconds, ephemeralRandomData: random_data, logger: logger, customMessageHandler: IgnoringMessageHandler().asCustomMessageHandler())
+        self.peerManager = PeerManager(messageHandler: messageHandler, currentTime: timestampSeconds, ephemeralRandomData: random_data, logger: params.logger, customMessageHandler: IgnoringMessageHandler().asCustomMessageHandler(), nodeSigner: params.nodeSigner)
 
         if let filter = filter {
             for (currentMonitor, _) in self.channel_monitors {
@@ -144,33 +166,33 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
     /**
      * Constructs a channel manager from the given interface implementations
      */
-    public init(network: Network, userConfig: UserConfig, currentBlockchainTipHash: [UInt8], currentBlockchainTipHeight: UInt32, keysInterface: KeysInterface, feeEstimator: FeeEstimator, chainMonitor: ChainMonitor, netGraph: NetworkGraph?, txBroadcaster: BroadcasterInterface, logger: Logger, enableP2PGossip: Bool = false, payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))) {
+    public init(network: Network, currentBlockchainTipHash: [UInt8], currentBlockchainTipHeight: UInt32, netGraph: NetworkGraph?, params: ChannelManagerConstructionParameters) {
 
+        self.constructionParameters = params
+        
         self.channel_monitors = []
         self.channel_manager_latest_block_hash = nil
-        self.chain_monitor = chainMonitor
         let block = BestBlock(blockHash: currentBlockchainTipHash, height: currentBlockchainTipHeight)
         let chainParameters = ChainParameters(networkArg: network, bestBlockArg: block)
-        self.channelManager = ChannelManager(feeEst: feeEstimator, chainMonitor: chainMonitor.asWatch(), txBroadcaster: txBroadcaster, logger: logger, keysManager: keysInterface, config: userConfig, params: chainParameters)
-		self.payerRetries = payerRetries
-        self.logger = logger
-
-        self.keysInterface = keysInterface
-        let random_data = keysInterface.getSecureRandomBytes();
-
+        
         self.netGraph = netGraph
+        let router = params.router(networkGraph: self.netGraph)
+        self.channelManager = ChannelManager(feeEst: params.feeEstimator, chainMonitor: params.chainMonitor.asWatch(), txBroadcaster: params.txBroadcaster, router: router, logger: params.logger, entropySource: params.entropySource, nodeSigner: params.nodeSigner, signerProvider: params.signerProvider, config: params.config, params: chainParameters)
+        
         let noCustomMessages = IgnoringMessageHandler()
         var messageHandler: MessageHandler!
-        if let netGraph = netGraph, enableP2PGossip {
-            let p2pGossipSync = P2PGossipSync(networkGraph: netGraph, chainAccess: nil, logger: logger)
+        if let netGraph = netGraph, params.enableP2PGossip {
+            let p2pGossipSync = P2PGossipSync(networkGraph: netGraph, utxoLookup: nil, logger: params.logger)
             self.graphMessageHandler = GossipSync.initWithP2P(a: p2pGossipSync)
             messageHandler = MessageHandler(chanHandlerArg: channelManager.asChannelMessageHandler(), routeHandlerArg: p2pGossipSync.asRoutingMessageHandler(), onionMessageHandlerArg: noCustomMessages.asOnionMessageHandler())
         } else {
             messageHandler = MessageHandler(chanHandlerArg: channelManager.asChannelMessageHandler(), routeHandlerArg: noCustomMessages.asRoutingMessageHandler(), onionMessageHandlerArg: noCustomMessages.asOnionMessageHandler())
         }
-        let nodeSecret = keysInterface.getNodeSecret(recipient: .Node).getValue()!
+        
+        let random_data = params.entropySource.getSecureRandomBytes();
+
         let timestampSeconds = UInt32(NSDate().timeIntervalSince1970)
-        self.peerManager = PeerManager(messageHandler: messageHandler, ourNodeSecret: nodeSecret, currentTime: timestampSeconds, ephemeralRandomData: random_data, logger: logger, customMessageHandler: noCustomMessages.asCustomMessageHandler())
+        self.peerManager = PeerManager(messageHandler: messageHandler, currentTime: timestampSeconds, ephemeralRandomData: random_data, logger: params.logger, customMessageHandler: noCustomMessages.asCustomMessageHandler(), nodeSigner: params.nodeSigner)
 
         super.init(conflictAvoidingVariableName: 0)
         // try! self.peerManager.addAnchor(anchor: self)
@@ -189,14 +211,14 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
      * This also spawns a background thread which will call the appropriate methods on the provided
      * ChannelManagerPersister as required.
      */
-    public func chainSyncCompleted(persister: ExtendedChannelManagerPersister, scorer: MultiThreadedLockableScore?) {
+    public func chainSyncCompleted(persister: ExtendedChannelManagerPersister) {
 
         if self.backgroundProcessor != nil {
             return
         }
 
         for (currentChannelMonitor, _) in self.channel_monitors {
-            let chainMonitorWatch = self.chain_monitor.asWatch()
+            let chainMonitorWatch = self.constructionParameters.chainMonitor.asWatch()
             // let monitorClone = currentChannelMonitor.dynamicallyDangledClone()
             // monitorClone.cType?.is_owned = false
             let (outPoint, _) = currentChannelMonitor.getFundingTxo()
@@ -210,22 +232,11 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
 
         self.customPersister = CustomChannelManagerPersister(handler: persister)
         self.customEventHandler = CustomEventHandler(handler: persister)
-        self.scorer = scorer
-
-        if let netGraph = self.netGraph, let scorer = self.scorer {
-            let router = DefaultRouter(networkGraph: netGraph, logger: self.logger, randomSeedBytes: self.keysInterface.getSecureRandomBytes(), scorer: scorer.asLockableScore())
-            // either dangle router, or set is_owned to false
-            // scorer.cType!.is_owned = false
-            // router.cType!.is_owned = false
-            self.payer = InvoicePayer(payer: self.channelManager.asPayer(), router: router.asRouter(), logger: self.logger, eventHandler: self.customEventHandler!, retry: self.payerRetries)
-            // router.cType!.is_owned = true
-            self.customEventHandler = self.payer!.asEventHandler()
-        }
 
         // if there is a graph msg handler, set its is_owned to false
         // self.graph_msg_handler?.cOpaqueStruct?.is_owned = false
 
-        self.backgroundProcessor = BackgroundProcessor.start(persister: self.customPersister!, eventHandler: self.customEventHandler!, chainMonitor: self.chain_monitor, channelManager: self.channelManager, gossipSync: self.graphMessageHandler ?? GossipSync.none(), peerManager: self.peerManager, logger: self.logger, scorer: self.scorer?.asWriteableScore())
+        self.backgroundProcessor = BackgroundProcessor.start(persister: self.customPersister!, eventHandler: self.customEventHandler!, chainMonitor: self.constructionParameters.chainMonitor, channelManager: self.channelManager, gossipSync: self.graphMessageHandler ?? GossipSync.none(), peerManager: self.peerManager, logger: self.constructionParameters.logger, scorer: self.constructionParameters.scorer?.asWriteableScore())
 
         // restore it back to true
         // self.graph_msg_handler?.cOpaqueStruct?.is_owned = true
@@ -263,8 +274,6 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
             print("removed background processor anchors")
         }
         */
-        self.payer = nil
-        self.scorer = nil
         self.backgroundProcessor = nil
         print("unset background processor")
     }
