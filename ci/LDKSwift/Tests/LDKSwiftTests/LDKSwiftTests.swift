@@ -235,12 +235,15 @@ class LDKSwiftTests: XCTestCase {
         let peerPubkey = Self.hexStringToBytes(hexString: "02deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")!
 		let userChannelId: [UInt8] = [UInt8](repeating: 42, count: 16);
         let channelOpenResult = channelManager.createChannel(theirNetworkKey: peerPubkey, channelValueSatoshis: channelValue, pushMsat: reserveAmount, userChannelId: userChannelId, overrideConfig: config)
-
+        
         let channelOpenError = channelOpenResult.getError()!
         print("error type: \(channelOpenError.getValueType())")
-
-        let channelUnavailableError = channelOpenError.getValueAsChannelUnavailable()!
-        print("channel unavailable error: \(channelUnavailableError.getErr())")
+        
+        if let misuseError = channelOpenError.getValueAsApiMisuseError() {
+            print("misuse error: \(misuseError.getErr())")
+        } else if let unavailableError = channelOpenError.getValueAsChannelUnavailable() {
+            print("channel unavailable error: \(unavailableError.getErr())")
+        }
     }
 
 
