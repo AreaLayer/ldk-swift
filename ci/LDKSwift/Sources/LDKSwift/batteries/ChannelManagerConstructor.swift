@@ -20,17 +20,17 @@ enum InvalidSerializedDataError: Error {
 }
 
 public struct ChannelManagerConstructionParameters {
-    var config: UserConfig
-    var entropySource: EntropySource
-    var nodeSigner: NodeSigner
-    var signerProvider: SignerProvider
-    var feeEstimator: FeeEstimator
-    var chainMonitor: ChainMonitor
-    var txBroadcaster: BroadcasterInterface
-    var enableP2PGossip: Bool = false
-    var scorer: MultiThreadedLockableScore?
-    var payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))
-    var logger: Logger
+    public var config: UserConfig
+    public var entropySource: EntropySource
+    public var nodeSigner: NodeSigner
+    public var signerProvider: SignerProvider
+    public var feeEstimator: FeeEstimator
+    public var chainMonitor: ChainMonitor
+    public var txBroadcaster: BroadcasterInterface
+    public var enableP2PGossip: Bool = false
+    public var scorer: MultiThreadedLockableScore?
+    public var payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))
+    public var logger: Logger
     
     fileprivate func router(networkGraph: NetworkGraph?) -> Router {
         if let netGraph = networkGraph, let scorer = self.scorer {
