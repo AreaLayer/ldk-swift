@@ -32,6 +32,21 @@ public struct ChannelManagerConstructionParameters {
     public var payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))
     public var logger: Logger
     
+    public init (config: UserConfig, entropySource: EntropySource, nodeSigner: NodeSigner, signerProvider: SignerProvider, feeEstimator: FeeEstimator, chainMonitor: ChainMonitor, txBroadcaster: BroadcasterInterface, logger: Logger, enableP2PGossip: Bool = false, scorer: MultiThreadedLockableScore? = nil, payerRetries: Retry = Retry.initWithAttempts(a: UInt(3))) {
+        self.config = config
+        self.entropySource = entropySource
+        self.nodeSigner = nodeSigner
+        self.signerProvider = signerProvider
+        self.feeEstimator = feeEstimator
+        self.chainMonitor = chainMonitor
+        self.txBroadcaster = txBroadcaster
+        self.logger = logger
+        
+        self.enableP2PGossip = enableP2PGossip
+        self.scorer = scorer
+        self.payerRetries = payerRetries
+    }
+    
     fileprivate func router(networkGraph: NetworkGraph?) -> Router {
         if let netGraph = networkGraph, let scorer = self.scorer {
             return DefaultRouter(networkGraph: netGraph, logger: self.logger, randomSeedBytes: self.entropySource.getSecureRandomBytes(), scorer: scorer.asLockableScore()).asRouter()
