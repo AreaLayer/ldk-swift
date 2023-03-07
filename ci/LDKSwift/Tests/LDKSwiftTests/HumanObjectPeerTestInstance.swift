@@ -301,6 +301,11 @@ public class HumanObjectPeerTestInstance {
 
                 let graph = NetworkGraph(network: .Regtest, logger: self.logger)
 
+                let scoringParams = ProbabilisticScoringParameters.initWithDefault()
+                let probabalisticScorer = ProbabilisticScorer(params: scoringParams, networkGraph: graph, logger: self.logger)
+                let score = probabalisticScorer.asScore()
+                let multiThreadedScorer = MultiThreadedLockableScore(score: score)
+                
                 let constructionParameters = ChannelManagerConstructionParameters(
                     config: UserConfig.initWithDefault(),
                     entropySource: self.explicitKeysManager.asEntropySource(),
@@ -309,14 +314,10 @@ public class HumanObjectPeerTestInstance {
                     feeEstimator: self.feeEstimator,
                     chainMonitor: self.chainMonitor!,
                     txBroadcaster: self.txBroadcaster,
-                    logger: self.logger
+                    logger: self.logger,
+                    scorer: multiThreadedScorer
                 )
                 self.constructor = ChannelManagerConstructor(network: .Bitcoin, currentBlockchainTipHash: [UInt8](repeating: 0, count: 32), currentBlockchainTipHeight: 0, netGraph: graph, params: constructionParameters)
-
-                let scoringParams = ProbabilisticScoringParameters.initWithDefault()
-                let probabalisticScorer = ProbabilisticScorer(params: scoringParams, networkGraph: graph, logger: self.logger)
-                let score = probabalisticScorer.asScore()
-                let multiThreadedScorer = MultiThreadedLockableScore(score: score)
 
                 self.constructor?.chainSyncCompleted(persister: TestChannelManagerPersister(master: self))
                 self.channelManager = self.constructor!.channelManager
@@ -643,7 +644,11 @@ public class HumanObjectPeerTestInstance {
         do {
             // create invoice for 10k satoshis to pay to peer2
 
-            let invoiceResult = Bindings.swiftCreateInvoiceFromChannelmanager(channelmanager: peer2.channelManager, nodeSigner: peer2.explicitKeysManager.asNodeSigner(), logger: logger, network: .Bitcoin, amtMsat: SEND_MSAT_AMOUNT_A_TO_B, description: "Invoice description", invoiceExpiryDeltaSecs: 60, minFinalCltvExpiryDelta: 3)
+            let invoiceResult = Bindings.swiftCreateInvoiceFromChannelmanager(channelmanager: peer2.channelManager, nodeSigner: peer2.explicitKeysManager.asNodeSigner(), logger: logger, network: .Bitcoin, amtMsat: SEND_MSAT_AMOUNT_A_TO_B, description: "Invoice description", invoiceExpiryDeltaSecs: 60, minFinalCltvExpiryDelta: 24)
+            if let invoiceError = invoiceResult.getError(){
+                let creationError = invoiceError.getValueAsCreationError()
+                print("creation error: \(creationError)")
+            }
             let invoice = invoiceResult.getValue()!
             print("Invoice: \(invoice.toStr())")
 
@@ -761,7 +766,7 @@ public class HumanObjectPeerTestInstance {
             print("pre-payment balance A->B mSats: \(prePaymentBalanceAToB)")
             print("pre-payment balance B->A mSats: \(prePaymentBalanceBToA)")
 
-            let invoiceResult = Bindings.swiftCreateInvoiceFromChannelmanager(channelmanager: peer1.channelManager, nodeSigner: peer1.explicitKeysManager.asNodeSigner(), logger: logger, network: .Bitcoin, amtMsat: nil, description: "Second invoice description", invoiceExpiryDeltaSecs: 60, minFinalCltvExpiryDelta: 3)
+            let invoiceResult = Bindings.swiftCreateInvoiceFromChannelmanager(channelmanager: peer1.channelManager, nodeSigner: peer1.explicitKeysManager.asNodeSigner(), logger: logger, network: .Bitcoin, amtMsat: nil, description: "Second invoice description", invoiceExpiryDeltaSecs: 60, minFinalCltvExpiryDelta: 24)
             let invoice = invoiceResult.getValue()!
             print("Implicit amount invoice: \(invoice.toStr())")
 
