@@ -19,6 +19,10 @@ enum InvalidSerializedDataError: Error {
     case badNodeSecret
 }
 
+enum RouterUnavailableError: Error {
+    case channelManagerInitializationMissingScorerOrNetworkGraph
+}
+
 public struct ChannelManagerConstructionParameters {
     public var config: UserConfig
     public var entropySource: EntropySource
@@ -47,12 +51,24 @@ public struct ChannelManagerConstructionParameters {
         self.payerRetries = payerRetries
     }
     
+    private class CMCRouter: Router {
+        override func findRoute(payer: [UInt8], routeParams: Bindings.RouteParameters, firstHops: [Bindings.ChannelDetails]?, inflightHtlcs: Bindings.InFlightHtlcs) -> Bindings.Result_RouteLightningErrorZ {
+            let errorString = "Error: Router unavailable: ChannelManagerConstructor initialized without Scorer or NetworkGraph."
+            Bindings.print(errorString, severity: .ERROR)
+            return .initWithErr(e: LightningError(errArg: errorString, actionArg: ErrorAction.initWithIgnoreAndLog(a: .Error)))
+        }
+        override func findRouteWithId(payer: [UInt8], routeParams: Bindings.RouteParameters, firstHops: [Bindings.ChannelDetails]?, inflightHtlcs: Bindings.InFlightHtlcs, PaymentHash: [UInt8], PaymentId: [UInt8]) -> Bindings.Result_RouteLightningErrorZ {
+            let errorString = "Error: Router unavailable: ChannelManagerConstructor initialized without Scorer or NetworkGraph."
+            Bindings.print(errorString, severity: .ERROR)
+            return .initWithErr(e: LightningError(errArg: errorString, actionArg: ErrorAction.initWithIgnoreAndLog(a: .Error)))
+        }
+    }
+    
     fileprivate func router(networkGraph: NetworkGraph?) -> Router {
         if let netGraph = networkGraph, let scorer = self.scorer {
             return DefaultRouter(networkGraph: netGraph, logger: self.logger, randomSeedBytes: self.entropySource.getSecureRandomBytes(), scorer: scorer.asLockableScore()).asRouter()
         }
-        // TODO: figure out better way of returning router instance
-        return Router()
+        return CMCRouter()
     }
 }
 

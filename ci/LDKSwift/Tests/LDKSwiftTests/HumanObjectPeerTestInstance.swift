@@ -239,7 +239,8 @@ public class HumanObjectPeerTestInstance {
             }
 
             override func persistGraph(networkGraph: Bindings.NetworkGraph) -> Bindings.Result_NoneErrorZ {
-                .initWithOk()
+                let writtenGraph = networkGraph.write();
+                return Result_NoneErrorZ.initWithOk()
             }
 
         }
