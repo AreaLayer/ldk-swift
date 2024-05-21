@@ -56,4 +56,7 @@ runs:
                 else
                     ./genbindings.sh ../rust-lightning true
                 fi
+                cd ./lightning-c-bindings
+                cargo update -p cc --precise "1.0.69" --verbose
+                cd ../
                 popd
