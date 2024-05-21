@@ -225,7 +225,7 @@ public class ChannelManagerConstructor: NativeTypeWrapper {
         
         self.channel_monitors = []
         self.channel_manager_latest_block_hash = nil
-        let block = BestBlock(blockHash: currentBlockchainTipHash, height: currentBlockchainTipHeight)
+        let block = BestBlock(blockHashArg: currentBlockchainTipHash, heightArg: currentBlockchainTipHeight)
         let chainParameters = ChainParameters(networkArg: network, bestBlockArg: block)
         
         self.netGraph = netGraph

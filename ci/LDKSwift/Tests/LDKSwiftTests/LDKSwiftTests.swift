@@ -241,7 +241,7 @@ class LDKSwiftTests: XCTestCase {
         let reserveAmount: UInt64 = 1000 // a thousand satoshis rserve
         let peerPubkey = Self.hexStringToBytes(hexString: "02deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")!
 		let userChannelId: [UInt8] = [UInt8](repeating: 42, count: 16);
-        let channelOpenResult = channelManager.createChannel(theirNetworkKey: peerPubkey, channelValueSatoshis: channelValue, pushMsat: reserveAmount, userChannelId: userChannelId, temporaryChannelId: nil, overrideConfig: config)
+        let channelOpenResult = channelManager.createChannel(theirNetworkKey: peerPubkey, channelValueSatoshis: channelValue, pushMsat: reserveAmount, userChannelId: userChannelId, temporaryChannelId: ChannelId.initWithZero(), overrideConfig: config)
         
         let channelOpenError = channelOpenResult.getError()!
         print("error type: \(channelOpenError.getValueType())")
