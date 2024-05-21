@@ -84,7 +84,11 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = Sleeper_from_single_future(future.dynamicallyDangledClone().cType!)
+			let nativeCallResult =
+				withUnsafePointer(to: future.cType!) { (futurePointer: UnsafePointer<LDKFuture>) in
+					Sleeper_from_single_future(futurePointer)
+				}
+
 
 			// cleanup
 
@@ -94,6 +98,7 @@ extension Bindings {
 				cType: nativeCallResult, instantiationContext: "Sleeper.swift::\(#function):\(#line)")
 
 
+			try! returnValue.addAnchor(anchor: future)
 			return returnValue
 		}
 
@@ -103,8 +108,15 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = Sleeper_from_two_futures(
-				futA.dynamicallyDangledClone().cType!, futB.dynamicallyDangledClone().cType!)
+			let nativeCallResult =
+				withUnsafePointer(to: futA.cType!) { (futAPointer: UnsafePointer<LDKFuture>) in
+
+					withUnsafePointer(to: futB.cType!) { (futBPointer: UnsafePointer<LDKFuture>) in
+						Sleeper_from_two_futures(futAPointer, futBPointer)
+					}
+
+				}
+
 
 			// cleanup
 
@@ -114,6 +126,8 @@ extension Bindings {
 				cType: nativeCallResult, instantiationContext: "Sleeper.swift::\(#function):\(#line)")
 
 
+			try! returnValue.addAnchor(anchor: futA)
+			try! returnValue.addAnchor(anchor: futB)
 			return returnValue
 		}
 

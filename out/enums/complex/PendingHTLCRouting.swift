@@ -161,13 +161,19 @@ extension Bindings {
 
 		/// Utility method to constructs a new Receive-variant PendingHTLCRouting
 		public class func initWithReceive(
-			paymentData: Bindings.FinalOnionHopData, paymentMetadata: [UInt8]?, incomingCltvExpiry: UInt32,
-			phantomSharedSecret: [UInt8], customTlvs: [(UInt64, [UInt8])], requiresBlindedError: Bool
+			paymentData: Bindings.FinalOnionHopData, paymentMetadata: [UInt8]?, paymentContext: PaymentContext?,
+			incomingCltvExpiry: UInt32, phantomSharedSecret: [UInt8], customTlvs: [(UInt64, [UInt8])],
+			requiresBlindedError: Bool
 		) -> PendingHTLCRouting {
 			// native call variable prep
 
 			let paymentMetadataOption = Option_CVec_u8ZZ(
 				some: paymentMetadata, instantiationContext: "PendingHTLCRouting.swift::\(#function):\(#line)"
+			)
+			.danglingClone()
+
+			let paymentContextOption = Option_PaymentContextZ(
+				some: paymentContext, instantiationContext: "PendingHTLCRouting.swift::\(#function):\(#line)"
 			)
 			.danglingClone()
 
@@ -182,8 +188,9 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = PendingHTLCRouting_receive(
-				paymentData.dynamicallyDangledClone().cType!, paymentMetadataOption.cType!, incomingCltvExpiry,
-				phantomSharedSecretPrimitiveWrapper.cType!, customTlvsVector.cType!, requiresBlindedError)
+				paymentData.dynamicallyDangledClone().cType!, paymentMetadataOption.cType!, paymentContextOption.cType!,
+				incomingCltvExpiry, phantomSharedSecretPrimitiveWrapper.cType!, customTlvsVector.cType!,
+				requiresBlindedError)
 
 			// cleanup
 
@@ -204,7 +211,7 @@ extension Bindings {
 		/// Utility method to constructs a new ReceiveKeysend-variant PendingHTLCRouting
 		public class func initWithReceiveKeysend(
 			paymentData: Bindings.FinalOnionHopData, paymentPreimage: [UInt8], paymentMetadata: [UInt8]?,
-			incomingCltvExpiry: UInt32, customTlvs: [(UInt64, [UInt8])]
+			incomingCltvExpiry: UInt32, customTlvs: [(UInt64, [UInt8])], requiresBlindedError: Bool
 		) -> PendingHTLCRouting {
 			// native call variable prep
 
@@ -225,7 +232,7 @@ extension Bindings {
 			// native method call
 			let nativeCallResult = PendingHTLCRouting_receive_keysend(
 				paymentData.dynamicallyDangledClone().cType!, paymentPreimagePrimitiveWrapper.cType!,
-				paymentMetadataOption.cType!, incomingCltvExpiry, customTlvsVector.cType!)
+				paymentMetadataOption.cType!, incomingCltvExpiry, customTlvsVector.cType!, requiresBlindedError)
 
 			// cleanup
 
@@ -531,6 +538,21 @@ extension Bindings {
 				return returnValue
 			}
 
+			/// The context of the payment included by the recipient in a blinded path, or `None` if a
+			/// blinded path was not used.
+			///
+			/// Used in part to determine the [`events::PaymentPurpose`].
+			public func getPaymentContext() -> PaymentContext? {
+				// return value (do some wrapping)
+				let returnValue = Option_PaymentContextZ(
+					cType: self.cType!.payment_context,
+					instantiationContext: "PendingHTLCRouting.swift::\(#function):\(#line)", anchor: self
+				)
+				.getValue()
+
+				return returnValue
+			}
+
 			/// CLTV expiry of the received HTLC.
 			///
 			/// Used to track when we should expire pending HTLCs that go unclaimed.
@@ -707,6 +729,14 @@ extension Bindings {
 					instantiationContext: "PendingHTLCRouting.swift::\(#function):\(#line)", anchor: self
 				)
 				.getValue()
+
+				return returnValue
+			}
+
+			/// Set if this HTLC is the final hop in a multi-hop blinded path.
+			public func getRequiresBlindedError() -> Bool {
+				// return value (do some wrapping)
+				let returnValue = self.cType!.requires_blinded_error
 
 				return returnValue
 			}

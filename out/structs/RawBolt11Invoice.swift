@@ -584,7 +584,7 @@ extension Bindings {
 			return returnValue
 		}
 
-		///
+		/// Returns `None` if no amount is set or on overflow.
 		public func amountPicoBtc() -> UInt64? {
 			// native call variable prep
 

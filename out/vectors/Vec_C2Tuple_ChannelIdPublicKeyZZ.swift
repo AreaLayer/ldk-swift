@@ -2,16 +2,15 @@
 	import LDKHeaders
 #endif
 
-/// A dynamically-allocated array of crate::c_types::derived::C2Tuple_PublicKeyCOption_SocketAddressZZs of arbitrary size.
+/// A dynamically-allocated array of crate::c_types::derived::C2Tuple_ChannelIdPublicKeyZs of arbitrary size.
 /// This corresponds to std::vector in C++
-internal typealias Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ = Bindings
-	.Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ
+internal typealias Vec_C2Tuple_ChannelIdPublicKeyZZ = Bindings.Vec_C2Tuple_ChannelIdPublicKeyZZ
 
 extension Bindings {
 
-	/// A dynamically-allocated array of crate::c_types::derived::C2Tuple_PublicKeyCOption_SocketAddressZZs of arbitrary size.
+	/// A dynamically-allocated array of crate::c_types::derived::C2Tuple_ChannelIdPublicKeyZs of arbitrary size.
 	/// This corresponds to std::vector in C++
-	internal class Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ: NativeTypeWrapper {
+	internal class Vec_C2Tuple_ChannelIdPublicKeyZZ: NativeTypeWrapper {
 
 
 		/// Set to false to suppress an individual type's deinit log statements.
@@ -26,9 +25,9 @@ extension Bindings {
 		private static var instanceCounter: UInt = 0
 		internal let instanceNumber: UInt
 
-		internal var cType: LDKCVec_C2Tuple_PublicKeyCOption_SocketAddressZZZ?
+		internal var cType: LDKCVec_C2Tuple_ChannelIdPublicKeyZZ?
 
-		internal init(cType: LDKCVec_C2Tuple_PublicKeyCOption_SocketAddressZZZ, instantiationContext: String) {
+		internal init(cType: LDKCVec_C2Tuple_ChannelIdPublicKeyZZ, instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -37,8 +36,7 @@ extension Bindings {
 		}
 
 		internal init(
-			cType: LDKCVec_C2Tuple_PublicKeyCOption_SocketAddressZZZ, instantiationContext: String,
-			anchor: NativeTypeWrapper
+			cType: LDKCVec_C2Tuple_ChannelIdPublicKeyZZ, instantiationContext: String, anchor: NativeTypeWrapper
 		) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
@@ -50,8 +48,8 @@ extension Bindings {
 		}
 
 		internal init(
-			cType: LDKCVec_C2Tuple_PublicKeyCOption_SocketAddressZZZ, instantiationContext: String,
-			anchor: NativeTypeWrapper, dangle: Bool = false
+			cType: LDKCVec_C2Tuple_ChannelIdPublicKeyZZ, instantiationContext: String, anchor: NativeTypeWrapper,
+			dangle: Bool = false
 		) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
@@ -63,18 +61,17 @@ extension Bindings {
 		}
 
 
-		internal init(array: [([UInt8], SocketAddress?)], instantiationContext: String) {
+		internal init(array: [(ChannelId, [UInt8])], instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 
 
-			let rustArray = array.map {
-				(currentValueDepth1: ([UInt8], SocketAddress?)) -> LDKC2Tuple_PublicKeyCOption_SocketAddressZZ in
+			let rustArray = array.map { (currentValueDepth1: (ChannelId, [UInt8])) -> LDKC2Tuple_ChannelIdPublicKeyZ in
 
-				let currentValueDepth1Tuple = Tuple_PublicKeyCOption_SocketAddressZZ(
+				let currentValueDepth1Tuple = Tuple_ChannelIdPublicKeyZ(
 					tuple: currentValueDepth1,
-					instantiationContext: "Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ.swift::\(#function):\(#line)"
+					instantiationContext: "Vec_C2Tuple_ChannelIdPublicKeyZZ.swift::\(#function):\(#line)"
 				)
 				.danglingClone()
 
@@ -82,18 +79,16 @@ extension Bindings {
 			}
 
 
-			let dataContainer = UnsafeMutablePointer<LDKC2Tuple_PublicKeyCOption_SocketAddressZZ>
-				.allocate(capacity: array.count)
+			let dataContainer = UnsafeMutablePointer<LDKC2Tuple_ChannelIdPublicKeyZ>.allocate(capacity: array.count)
 			dataContainer.initialize(from: rustArray, count: array.count)
 
-			let vector = LDKCVec_C2Tuple_PublicKeyCOption_SocketAddressZZZ(
-				data: dataContainer, datalen: UInt(array.count))
+			let vector = LDKCVec_C2Tuple_ChannelIdPublicKeyZZ(data: dataContainer, datalen: UInt(array.count))
 			self.cType = vector
 		}
 
-		public func getValue() -> [([UInt8], SocketAddress?)] {
+		public func getValue() -> [(ChannelId, [UInt8])] {
 
-			var array = [LDKC2Tuple_PublicKeyCOption_SocketAddressZZ]()
+			var array = [LDKC2Tuple_ChannelIdPublicKeyZ]()
 
 
 			for index1 in 0..<Int(self.cType!.datalen) {
@@ -102,11 +97,10 @@ extension Bindings {
 			}
 
 
-			let swiftArray = array.map {
-				(currentCType: LDKC2Tuple_PublicKeyCOption_SocketAddressZZ) -> ([UInt8], SocketAddress?) in
-				Tuple_PublicKeyCOption_SocketAddressZZ(
+			let swiftArray = array.map { (currentCType: LDKC2Tuple_ChannelIdPublicKeyZ) -> (ChannelId, [UInt8]) in
+				Tuple_ChannelIdPublicKeyZ(
 					cType: currentCType,
-					instantiationContext: "Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ.swift::\(#function):\(#line)"
+					instantiationContext: "Vec_C2Tuple_ChannelIdPublicKeyZZ.swift::\(#function):\(#line)"
 				)
 				.dangle().getValue()
 			}
@@ -120,7 +114,7 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = CVec_C2Tuple_PublicKeyCOption_SocketAddressZZZ_free(self.cType!)
+			let nativeCallResult = CVec_C2Tuple_ChannelIdPublicKeyZZ_free(self.cType!)
 
 			// cleanup
 
@@ -141,14 +135,14 @@ extension Bindings {
 			if !self.dangling {
 				if Self.enableDeinitLogging {
 					Bindings.print(
-						"Freeing Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ \(self.instanceNumber). (Origin: \(self.instantiationContext))"
+						"Freeing Vec_C2Tuple_ChannelIdPublicKeyZZ \(self.instanceNumber). (Origin: \(self.instantiationContext))"
 					)
 				}
 
 				self.free()
 			} else if Self.enableDeinitLogging {
 				Bindings.print(
-					"Not freeing Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
+					"Not freeing Vec_C2Tuple_ChannelIdPublicKeyZZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
 				)
 			}
 		}

@@ -86,7 +86,7 @@ extension Bindings {
 		}
 
 		/// A temporary channel ID, until the funding is established
-		public func getTemporaryChannelId() -> [UInt8]? {
+		public func getTemporaryChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -99,38 +99,32 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "FundingCreated.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// A temporary channel ID, until the funding is established
-		public func setTemporaryChannelId(val: [UInt8]) {
+		public func setTemporaryChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "FundingCreated.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) {
 					(thisPtrPointer: UnsafeMutablePointer<LDKFundingCreated>) in
-					FundingCreated_set_temporary_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					FundingCreated_set_temporary_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -297,13 +291,10 @@ extension Bindings {
 
 		/// Constructs a new FundingCreated given each field
 		public init(
-			temporaryChannelIdArg: [UInt8], fundingTxidArg: [UInt8], fundingOutputIndexArg: UInt16,
+			temporaryChannelIdArg: ChannelId, fundingTxidArg: [UInt8], fundingOutputIndexArg: UInt16,
 			signatureArg: [UInt8]
 		) {
 			// native call variable prep
-
-			let temporaryChannelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: temporaryChannelIdArg, instantiationContext: "FundingCreated.swift::\(#function):\(#line)")
 
 			let fundingTxidArgPrimitiveWrapper = ThirtyTwoBytes(
 				value: fundingTxidArg, instantiationContext: "FundingCreated.swift::\(#function):\(#line)")
@@ -314,13 +305,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = FundingCreated_new(
-				temporaryChannelIdArgPrimitiveWrapper.cType!, fundingTxidArgPrimitiveWrapper.cType!,
+				temporaryChannelIdArg.dynamicallyDangledClone().cType!, fundingTxidArgPrimitiveWrapper.cType!,
 				fundingOutputIndexArg, signatureArgPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			temporaryChannelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			fundingTxidArgPrimitiveWrapper.noOpRetain()

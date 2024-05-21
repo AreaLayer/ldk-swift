@@ -287,31 +287,6 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Convert an `OutPoint` to a lightning channel id.
-		public func toChannelId() -> [UInt8] {
-			// native call variable prep
-
-
-			// native method call
-			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKOutPoint>) in
-					OutPoint_to_channel_id(thisArgPointer)
-				}
-
-
-			// cleanup
-
-
-			// return value (do some wrapping)
-			let returnValue = ThirtyTwoBytes(
-				cType: nativeCallResult, instantiationContext: "OutPoint.swift::\(#function):\(#line)", anchor: self
-			)
-			.dangle(false).getValue()
-
-
-			return returnValue
-		}
-
 		/// Serialize the OutPoint object into a byte array which can be read by OutPoint_read
 		public func write() -> [UInt8] {
 			// native call variable prep

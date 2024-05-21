@@ -174,6 +174,28 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Generates a non-cryptographic 64-bit hash of the SendSuccess.
+		public func hash() -> UInt64 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (oPointer: UnsafePointer<LDKSendSuccess>) in
+					SendSuccess_hash(oPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// Checks if two SendSuccesss contain equal inner contents.
 		/// This ignores pointers and is_owned flags and looks at the values in fields.
 		public class func eq(a: SendSuccess, b: SendSuccess) -> Bool {

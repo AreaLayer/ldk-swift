@@ -1976,6 +1976,94 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Set this feature as optional.
+		public func setTrampolineRoutingOptional() {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisArgPointer: UnsafeMutablePointer<LDKNodeFeatures>) in
+					NodeFeatures_set_trampoline_routing_optional(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Set this feature as required.
+		public func setTrampolineRoutingRequired() {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisArgPointer: UnsafeMutablePointer<LDKNodeFeatures>) in
+					NodeFeatures_set_trampoline_routing_required(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Checks if this feature is supported.
+		public func supportsTrampolineRouting() -> Bool {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKNodeFeatures>) in
+					NodeFeatures_supports_trampoline_routing(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Checks if this feature is required.
+		public func requiresTrampolineRouting() -> Bool {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKNodeFeatures>) in
+					NodeFeatures_requires_trampoline_routing(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 
 		/// Indicates that this is the only struct which contains the same pointer.
 		/// Rust functions which take ownership of an object provided via an argument require

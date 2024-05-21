@@ -16,6 +16,10 @@ import Foundation
 ///
 /// Note that all of the functions implemented here *must* be reentrant-safe (obviously - they're
 /// called from inside the library in response to chain events, P2P events, or timer events).
+///
+/// LDK may generate a substantial number of fee-estimation calls in some cases. You should
+/// pre-calculate and cache the fee estimate results to ensure you don't substantially slow HTLC
+/// handling.
 public typealias FeeEstimator = Bindings.FeeEstimator
 
 extension Bindings {
@@ -30,6 +34,10 @@ extension Bindings {
 	///
 	/// Note that all of the functions implemented here *must* be reentrant-safe (obviously - they're
 	/// called from inside the library in response to chain events, P2P events, or timer events).
+	///
+	/// LDK may generate a substantial number of fee-estimation calls in some cases. You should
+	/// pre-calculate and cache the fee estimate results to ensure you don't substantially slow HTLC
+	/// handling.
 	open class FeeEstimator: NativeTraitWrapper {
 
 

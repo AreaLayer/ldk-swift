@@ -195,11 +195,14 @@ extension Bindings {
 
 		/// Utility method to constructs a new ChannelClose-variant BumpTransactionEvent
 		public class func initWithChannelClose(
-			claimId: [UInt8], packageTargetFeerateSatPer1000Weight: UInt32, commitmentTx: [UInt8],
-			commitmentTxFeeSatoshis: UInt64, anchorDescriptor: Bindings.AnchorDescriptor,
-			pendingHtlcs: [HTLCOutputInCommitment]
+			channelId: Bindings.ChannelId, counterpartyNodeId: [UInt8], claimId: [UInt8],
+			packageTargetFeerateSatPer1000Weight: UInt32, commitmentTx: [UInt8], commitmentTxFeeSatoshis: UInt64,
+			anchorDescriptor: Bindings.AnchorDescriptor, pendingHtlcs: [HTLCOutputInCommitment]
 		) -> BumpTransactionEvent {
 			// native call variable prep
+
+			let counterpartyNodeIdPrimitiveWrapper = PublicKey(
+				value: counterpartyNodeId, instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)")
 
 			let claimIdPrimitiveWrapper = ThirtyTwoBytes(
 				value: claimId, instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)")
@@ -217,11 +220,15 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = BumpTransactionEvent_channel_close(
+				channelId.dynamicallyDangledClone().cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
 				claimIdPrimitiveWrapper.cType!, packageTargetFeerateSatPer1000Weight,
 				commitmentTxPrimitiveWrapper.cType!, commitmentTxFeeSatoshis,
 				anchorDescriptor.dynamicallyDangledClone().cType!, pendingHtlcsVector.cType!)
 
 			// cleanup
+
+			// for elided types, we need this
+			counterpartyNodeIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			claimIdPrimitiveWrapper.noOpRetain()
@@ -242,10 +249,13 @@ extension Bindings {
 
 		/// Utility method to constructs a new HTLCResolution-variant BumpTransactionEvent
 		public class func initWithHtlcresolution(
-			claimId: [UInt8], targetFeerateSatPer1000Weight: UInt32, htlcDescriptors: [HTLCDescriptor],
-			txLockTime: UInt32
+			channelId: Bindings.ChannelId, counterpartyNodeId: [UInt8], claimId: [UInt8],
+			targetFeerateSatPer1000Weight: UInt32, htlcDescriptors: [HTLCDescriptor], txLockTime: UInt32
 		) -> BumpTransactionEvent {
 			// native call variable prep
+
+			let counterpartyNodeIdPrimitiveWrapper = PublicKey(
+				value: counterpartyNodeId, instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)")
 
 			let claimIdPrimitiveWrapper = ThirtyTwoBytes(
 				value: claimId, instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)")
@@ -258,9 +268,13 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = BumpTransactionEvent_htlcresolution(
+				channelId.dynamicallyDangledClone().cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
 				claimIdPrimitiveWrapper.cType!, targetFeerateSatPer1000Weight, htlcDescriptorsVector.cType!, txLockTime)
 
 			// cleanup
+
+			// for elided types, we need this
+			counterpartyNodeIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			claimIdPrimitiveWrapper.noOpRetain()
@@ -408,6 +422,28 @@ extension Bindings {
 			}
 
 
+			/// The `channel_id` of the channel which has been closed.
+			public func getChannelId() -> Bindings.ChannelId {
+				// return value (do some wrapping)
+				let returnValue = Bindings.ChannelId(
+					cType: self.cType!.channel_id,
+					instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)", anchor: self)
+
+				return returnValue
+			}
+
+			/// Counterparty in the closed channel.
+			public func getCounterpartyNodeId() -> [UInt8] {
+				// return value (do some wrapping)
+				let returnValue = PublicKey(
+					cType: self.cType!.counterparty_node_id,
+					instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)", anchor: self
+				)
+				.getValue()
+
+				return returnValue
+			}
+
 			/// The unique identifier for the claim of the anchor output in the commitment transaction.
 			///
 			/// The identifier must map to the set of external UTXOs assigned to the claim, such that
@@ -540,6 +576,28 @@ extension Bindings {
 				try! self.addAnchor(anchor: anchor)
 			}
 
+
+			/// The `channel_id` of the channel which has been closed.
+			public func getChannelId() -> Bindings.ChannelId {
+				// return value (do some wrapping)
+				let returnValue = Bindings.ChannelId(
+					cType: self.cType!.channel_id,
+					instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)", anchor: self)
+
+				return returnValue
+			}
+
+			/// Counterparty in the closed channel.
+			public func getCounterpartyNodeId() -> [UInt8] {
+				// return value (do some wrapping)
+				let returnValue = PublicKey(
+					cType: self.cType!.counterparty_node_id,
+					instantiationContext: "BumpTransactionEvent.swift::\(#function):\(#line)", anchor: self
+				)
+				.getValue()
+
+				return returnValue
+			}
 
 			/// The unique identifier for the claim of the HTLCs in the confirmed commitment
 			/// transaction.

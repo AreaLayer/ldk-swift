@@ -76,7 +76,7 @@ extension Bindings {
 		}
 
 		/// The channel ID where splicing is intended
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -89,37 +89,30 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "Splice.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID where splicing is intended
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "Splice.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKSplice>) in
-					Splice_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					Splice_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -371,13 +364,10 @@ extension Bindings {
 
 		/// Constructs a new Splice given each field
 		public init(
-			channelIdArg: [UInt8], chainHashArg: [UInt8], relativeSatoshisArg: Int64, fundingFeeratePerkwArg: UInt32,
+			channelIdArg: ChannelId, chainHashArg: [UInt8], relativeSatoshisArg: Int64, fundingFeeratePerkwArg: UInt32,
 			locktimeArg: UInt32, fundingPubkeyArg: [UInt8]
 		) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "Splice.swift::\(#function):\(#line)")
 
 			let chainHashArgPrimitiveWrapper = ThirtyTwoBytes(
 				value: chainHashArg, instantiationContext: "Splice.swift::\(#function):\(#line)")
@@ -388,13 +378,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Splice_new(
-				channelIdArgPrimitiveWrapper.cType!, chainHashArgPrimitiveWrapper.cType!, relativeSatoshisArg,
+				channelIdArg.dynamicallyDangledClone().cType!, chainHashArgPrimitiveWrapper.cType!, relativeSatoshisArg,
 				fundingFeeratePerkwArg, locktimeArg, fundingPubkeyArgPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			chainHashArgPrimitiveWrapper.noOpRetain()

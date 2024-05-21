@@ -393,6 +393,199 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Excess address data which was signed as a part of the message which we do not (yet) understand how
+		/// to decode.
+		///
+		/// This is stored to ensure forward-compatibility as new address types are added to the lightning gossip protocol.
+		///
+		/// Returns a copy of the field.
+		public func getExcessAddressData() -> [UInt8] {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKUnsignedNodeAnnouncement>) in
+					UnsignedNodeAnnouncement_get_excess_address_data(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Vec_u8Z(
+				cType: nativeCallResult, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
+		/// Excess address data which was signed as a part of the message which we do not (yet) understand how
+		/// to decode.
+		///
+		/// This is stored to ensure forward-compatibility as new address types are added to the lightning gossip protocol.
+		public func setExcessAddressData(val: [UInt8]) {
+			// native call variable prep
+
+			let valVector = Vec_u8Z(
+				array: val, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) {
+					(thisPtrPointer: UnsafeMutablePointer<LDKUnsignedNodeAnnouncement>) in
+					UnsignedNodeAnnouncement_set_excess_address_data(thisPtrPointer, valVector.cType!)
+				}
+
+
+			// cleanup
+
+			// valVector.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Excess data which was signed as a part of the message which we do not (yet) understand how
+		/// to decode.
+		///
+		/// This is stored to ensure forward-compatibility as new fields are added to the lightning gossip protocol.
+		///
+		/// Returns a copy of the field.
+		public func getExcessData() -> [UInt8] {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKUnsignedNodeAnnouncement>) in
+					UnsignedNodeAnnouncement_get_excess_data(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Vec_u8Z(
+				cType: nativeCallResult, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
+		/// Excess data which was signed as a part of the message which we do not (yet) understand how
+		/// to decode.
+		///
+		/// This is stored to ensure forward-compatibility as new fields are added to the lightning gossip protocol.
+		public func setExcessData(val: [UInt8]) {
+			// native call variable prep
+
+			let valVector = Vec_u8Z(
+				array: val, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) {
+					(thisPtrPointer: UnsafeMutablePointer<LDKUnsignedNodeAnnouncement>) in
+					UnsignedNodeAnnouncement_set_excess_data(thisPtrPointer, valVector.cType!)
+				}
+
+
+			// cleanup
+
+			// valVector.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Constructs a new UnsignedNodeAnnouncement given each field
+		public init(
+			featuresArg: NodeFeatures, timestampArg: UInt32, nodeIdArg: NodeId, rgbArg: [UInt8], aliasArg: NodeAlias,
+			addressesArg: [SocketAddress], excessAddressDataArg: [UInt8], excessDataArg: [UInt8]
+		) {
+			// native call variable prep
+
+			let rgbArgPrimitiveWrapper = ThreeBytes(
+				value: rgbArg, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)")
+
+			let addressesArgVector = Vec_SocketAddressZ(
+				array: addressesArg, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+			let excessAddressDataArgVector = Vec_u8Z(
+				array: excessAddressDataArg,
+				instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+			let excessDataArgVector = Vec_u8Z(
+				array: excessDataArg, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+
+			// native method call
+			let nativeCallResult = UnsignedNodeAnnouncement_new(
+				featuresArg.dynamicallyDangledClone().cType!, timestampArg, nodeIdArg.dynamicallyDangledClone().cType!,
+				rgbArgPrimitiveWrapper.cType!, aliasArg.dynamicallyDangledClone().cType!, addressesArgVector.cType!,
+				excessAddressDataArgVector.cType!, excessDataArgVector.cType!)
+
+			// cleanup
+
+			// for elided types, we need this
+			rgbArgPrimitiveWrapper.noOpRetain()
+
+			// addressesArgVector.noOpRetain()
+
+			// excessAddressDataArgVector.noOpRetain()
+
+			// excessDataArgVector.noOpRetain()
+
+			self.initialCFreeability = nativeCallResult.is_owned
+
+
+			/*
+						// return value (do some wrapping)
+						let returnValue = UnsignedNodeAnnouncement(cType: nativeCallResult, instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)")
+						*/
+
+
+			self.cType = nativeCallResult
+
+			Self.instanceCounter += 1
+			self.instanceNumber = Self.instanceCounter
+			super
+				.init(
+					conflictAvoidingVariableName: 0,
+					instantiationContext: "UnsignedNodeAnnouncement.swift::\(#function):\(#line)")
+
+
+		}
+
 		/// Creates a copy of the UnsignedNodeAnnouncement
 		internal func clone() -> UnsignedNodeAnnouncement {
 			// native call variable prep

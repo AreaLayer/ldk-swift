@@ -80,7 +80,7 @@ extension Bindings {
 		}
 
 		/// The channel ID
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -93,37 +93,30 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "TxSignatures.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "TxSignatures.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKTxSignatures>) in
-					TxSignatures_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					TxSignatures_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -241,12 +234,63 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Constructs a new TxSignatures given each field
-		public init(channelIdArg: [UInt8], txHashArg: [UInt8], witnessesArg: [[UInt8]]) {
+		/// Optional signature for the shared input -- the previous funding outpoint -- signed by both peers
+		public func getFundingOutpointSig() -> [UInt8]? {
 			// native call variable prep
 
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "TxSignatures.swift::\(#function):\(#line)")
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKTxSignatures>) in
+					TxSignatures_get_funding_outpoint_sig(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Option_ECDSASignatureZ(
+				cType: nativeCallResult, instantiationContext: "TxSignatures.swift::\(#function):\(#line)", anchor: self
+			)
+			.getValue()
+
+
+			return returnValue
+		}
+
+		/// Optional signature for the shared input -- the previous funding outpoint -- signed by both peers
+		public func setFundingOutpointSig(val: [UInt8]?) {
+			// native call variable prep
+
+			let valOption = Option_ECDSASignatureZ(
+				some: val, instantiationContext: "TxSignatures.swift::\(#function):\(#line)"
+			)
+			.danglingClone()
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKTxSignatures>) in
+					TxSignatures_set_funding_outpoint_sig(thisPtrPointer, valOption.cType!)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Constructs a new TxSignatures given each field
+		public init(
+			channelIdArg: ChannelId, txHashArg: [UInt8], witnessesArg: [[UInt8]], fundingOutpointSigArg: [UInt8]?
+		) {
+			// native call variable prep
 
 			let txHashArgPrimitiveWrapper = ThirtyTwoBytes(
 				value: txHashArg, instantiationContext: "TxSignatures.swift::\(#function):\(#line)")
@@ -256,15 +300,18 @@ extension Bindings {
 			)
 			.dangle()
 
+			let fundingOutpointSigArgOption = Option_ECDSASignatureZ(
+				some: fundingOutpointSigArg, instantiationContext: "TxSignatures.swift::\(#function):\(#line)"
+			)
+			.danglingClone()
+
 
 			// native method call
 			let nativeCallResult = TxSignatures_new(
-				channelIdArgPrimitiveWrapper.cType!, txHashArgPrimitiveWrapper.cType!, witnessesArgVector.cType!)
+				channelIdArg.dynamicallyDangledClone().cType!, txHashArgPrimitiveWrapper.cType!,
+				witnessesArgVector.cType!, fundingOutpointSigArgOption.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			txHashArgPrimitiveWrapper.noOpRetain()

@@ -91,6 +91,11 @@ extension Bindings {
 			/// [`NodeSigner`]: crate::sign::NodeSigner
 			case GetNodeIdFailed
 
+			/// The provided [`Destination`] has a blinded path with an unresolved introduction node. An
+			/// attempt to resolve it in the [`MessageRouter`] when finding an [`OnionMessagePath`] likely
+			/// failed.
+			case UnresolvedIntroductionNode
+
 			/// We attempted to send to a blinded path where we are the introduction node, and failed to
 			/// advance the blinded path to make the second hop the new introduction node. Either
 			/// [`NodeSigner::ecdh`] failed, we failed to tweak the current blinding point to get the
@@ -124,6 +129,9 @@ extension Bindings {
 
 				case LDKSendError_GetNodeIdFailed:
 					return .GetNodeIdFailed
+
+				case LDKSendError_UnresolvedIntroductionNode:
+					return .UnresolvedIntroductionNode
 
 				case LDKSendError_BlindedPathAdvanceFailed:
 					return .BlindedPathAdvanceFailed
@@ -334,6 +342,25 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Utility method to constructs a new UnresolvedIntroductionNode-variant SendError
+		public class func initWithUnresolvedIntroductionNode() -> SendError {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = SendError_unresolved_introduction_node()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = SendError(
+				cType: nativeCallResult, instantiationContext: "SendError.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 		/// Utility method to constructs a new BlindedPathAdvanceFailed-variant SendError
 		public class func initWithBlindedPathAdvanceFailed() -> SendError {
 			// native call variable prep
@@ -348,6 +375,28 @@ extension Bindings {
 			// return value (do some wrapping)
 			let returnValue = SendError(
 				cType: nativeCallResult, instantiationContext: "SendError.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Generates a non-cryptographic 64-bit hash of the SendError.
+		public func hash() -> UInt64 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (oPointer: UnsafePointer<LDKSendError>) in
+					SendError_hash(oPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
 
 
 			return returnValue

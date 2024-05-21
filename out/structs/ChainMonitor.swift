@@ -222,11 +222,11 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Lists the funding outpoint of each [`ChannelMonitor`] being monitored.
+		/// Lists the funding outpoint and channel ID of each [`ChannelMonitor`] being monitored.
 		///
 		/// Note that [`ChannelMonitor`]s are not removed when a channel is closed as they are always
 		/// monitoring for on-chain state resolutions.
-		public func listMonitors() -> [OutPoint] {
+		public func listMonitors() -> [(OutPoint, ChannelId)] {
 			// native call variable prep
 
 
@@ -241,7 +241,7 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = Vec_OutPointZ(
+			let returnValue = Vec_C2Tuple_OutPointChannelIdZZ(
 				cType: nativeCallResult, instantiationContext: "ChainMonitor.swift::\(#function):\(#line)", anchor: self
 			)
 			.dangle(false).getValue()
@@ -361,6 +361,63 @@ extension Bindings {
 			let nativeCallResult =
 				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChainMonitor>) in
 					ChainMonitor_rebroadcast_pending_claims(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Triggers rebroadcasts of pending claims from force-closed channels after a transaction
+		/// signature generation failure.
+		///
+		/// `monitor_opt` can be used as a filter to only trigger them for a specific channel monitor.
+		///
+		/// Note that monitor_opt (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func signerUnblocked(monitorOpt: OutPoint) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChainMonitor>) in
+					ChainMonitor_signer_unblocked(thisArgPointer, monitorOpt.dynamicallyDangledClone().cType!)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Archives fully resolved channel monitors by calling [`Persist::archive_persisted_channel`].
+		///
+		/// This is useful for pruning fully resolved monitors from the monitor set and primary
+		/// storage so they are not kept in memory and reloaded on restart.
+		///
+		/// Should be called occasionally (once every handful of blocks or on startup).
+		///
+		/// Depending on the implementation of [`Persist::archive_persisted_channel`] the monitor
+		/// data could be moved to an archive location or removed entirely.
+		public func archiveFullyResolvedChannelMonitors() {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChainMonitor>) in
+					ChainMonitor_archive_fully_resolved_channel_monitors(thisArgPointer)
 				}
 
 

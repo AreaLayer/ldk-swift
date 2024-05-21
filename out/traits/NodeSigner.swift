@@ -184,7 +184,7 @@ extension Bindings {
 						cType: invoice_request.pointee,
 						instantiationContext: "NodeSigner.swift::init()::\(#function):\(#line)"
 					)
-					.dangle())
+					.dangle().clone())
 
 				// cleanup
 
@@ -209,7 +209,7 @@ extension Bindings {
 					invoice: UnsignedBolt12Invoice(
 						cType: invoice.pointee, instantiationContext: "NodeSigner.swift::init()::\(#function):\(#line)"
 					)
-					.dangle())
+					.dangle().clone())
 
 				// cleanup
 

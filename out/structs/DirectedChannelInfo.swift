@@ -156,6 +156,62 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Returns the `node_id` of the source hop.
+		///
+		/// Refers to the `node_id` forwarding the payment to the next hop.
+		public func source() -> NodeId {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKDirectedChannelInfo>) in
+					DirectedChannelInfo_source(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = NodeId(
+				cType: nativeCallResult, instantiationContext: "DirectedChannelInfo.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// Returns the `node_id` of the target hop.
+		///
+		/// Refers to the `node_id` receiving the payment from the previous hop.
+		public func target() -> NodeId {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKDirectedChannelInfo>) in
+					DirectedChannelInfo_target(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = NodeId(
+				cType: nativeCallResult, instantiationContext: "DirectedChannelInfo.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
 
 		/// Indicates that this is the only struct which contains the same pointer.
 		/// Rust functions which take ownership of an object provided via an argument require

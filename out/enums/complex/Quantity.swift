@@ -1,17 +1,17 @@
+import Foundation
+
 #if SWIFT_PACKAGE
 	import LDKHeaders
 #endif
 
-/// Quantity of items supported by an [`Offer`].
+
+///
 public typealias Quantity = Bindings.Quantity
 
 extension Bindings {
 
-
 	/// Quantity of items supported by an [`Offer`].
 	public class Quantity: NativeTypeWrapper {
-
-		let initialCFreeability: Bool
 
 
 		/// Set to false to suppress an individual type's deinit log statements.
@@ -32,7 +32,7 @@ extension Bindings {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
-			self.initialCFreeability = self.cType!.is_owned
+
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 		}
 
@@ -40,7 +40,7 @@ extension Bindings {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
-			self.initialCFreeability = self.cType!.is_owned
+
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 			self.dangling = true
 			try! self.addAnchor(anchor: anchor)
@@ -51,14 +51,50 @@ extension Bindings {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
-			self.initialCFreeability = self.cType!.is_owned
+
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 			self.dangling = dangle
 			try! self.addAnchor(anchor: anchor)
 		}
 
 
-		/// Frees any resources used by the Quantity, if is_owned is set and inner is non-NULL.
+		public enum QuantityType {
+
+			/// Up to a specific number of items (inclusive). Use when more than one item can be requested
+			/// but is limited (e.g., because of per customer or inventory limits).
+			///
+			/// May be used with `NonZeroU64::new(1)` but prefer to use [`Quantity::One`] if only one item
+			/// is supported.
+			case Bounded
+
+			/// One or more items. Use when more than one item can be requested without any limit.
+			case Unbounded
+
+			/// Only one item. Use when only a single item can be requested.
+			case One
+
+		}
+
+		public func getValueType() -> QuantityType {
+			switch self.cType!.tag {
+				case LDKQuantity_Bounded:
+					return .Bounded
+
+				case LDKQuantity_Unbounded:
+					return .Unbounded
+
+				case LDKQuantity_One:
+					return .One
+
+				default:
+					Bindings.print("Error: Invalid value type for Quantity! Aborting.", severity: .ERROR)
+					abort()
+			}
+
+		}
+
+
+		/// Frees any resources used by the Quantity
 		internal func free() {
 			// native call variable prep
 
@@ -99,15 +135,70 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Utility method to constructs a new Bounded-variant Quantity
+		public class func initWithBounded(a: UInt64) -> Quantity {
+			// native call variable prep
 
-		/// Indicates that this is the only struct which contains the same pointer.
-		/// Rust functions which take ownership of an object provided via an argument require
-		/// this to be true and invalidate the object pointed to by inner.
-		public func isOwned() -> Bool {
+
+			// native method call
+			let nativeCallResult = Quantity_bounded(a)
+
+			// cleanup
+
+
 			// return value (do some wrapping)
-			let returnValue = self.cType!.is_owned
+			let returnValue = Quantity(
+				cType: nativeCallResult, instantiationContext: "Quantity.swift::\(#function):\(#line)")
+
 
 			return returnValue
+		}
+
+		/// Utility method to constructs a new Unbounded-variant Quantity
+		public class func initWithUnbounded() -> Quantity {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = Quantity_unbounded()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Quantity(
+				cType: nativeCallResult, instantiationContext: "Quantity.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Utility method to constructs a new One-variant Quantity
+		public class func initWithOne() -> Quantity {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = Quantity_one()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Quantity(
+				cType: nativeCallResult, instantiationContext: "Quantity.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+
+		public func getValueAsBounded() -> UInt64? {
+			if self.cType?.tag != LDKQuantity_Bounded {
+				return nil
+			}
+
+			return self.cType!.bounded
 		}
 
 
@@ -115,23 +206,6 @@ extension Bindings {
 			let dangledClone = self.clone()
 			dangledClone.dangling = true
 			return dangledClone
-		}
-
-		internal func dynamicallyDangledClone() -> Quantity {
-			let dangledClone = self.clone()
-			// if it's owned, i. e. controlled by Rust, it should dangle on our end
-			dangledClone.dangling = dangledClone.cType!.is_owned
-			return dangledClone
-		}
-
-		internal func setCFreeability(freeable: Bool) -> Quantity {
-			self.cType!.is_owned = freeable
-			return self
-		}
-
-		internal func dynamicDangle() -> Quantity {
-			self.dangling = self.cType!.is_owned
-			return self
 		}
 
 		deinit {
@@ -154,6 +228,4 @@ extension Bindings {
 
 	}
 
-
 }
-

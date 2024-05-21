@@ -74,7 +74,21 @@ extension Bindings {
 
 			/// The channel was closed after negotiating a cooperative close and we've now broadcasted
 			/// the cooperative close transaction. Note the shutdown may have been initiated by us.
-			case CooperativeClosure
+			///
+			/// This was only set in versions of LDK prior to 0.0.122.
+			case LegacyCooperativeClosure
+
+			/// The channel was closed after negotiating a cooperative close and we've now broadcasted
+			/// the cooperative close transaction. This indicates that the shutdown was initiated by our
+			/// counterparty.
+			///
+			/// In rare cases where we initiated closure immediately prior to shutting down without
+			/// persisting, this value may be provided for channels we initiated closure for.
+			case CounterpartyInitiatedCooperativeClosure
+
+			/// The channel was closed after negotiating a cooperative close and we've now broadcasted
+			/// the cooperative close transaction. This indicates that the shutdown was initiated by us.
+			case LocallyInitiatedCooperativeClosure
 
 			/// A commitment transaction was confirmed on chain, closing the channel. Most likely this
 			/// commitment transaction came from our counterparty, but it may also have come from
@@ -114,6 +128,9 @@ extension Bindings {
 			/// was ready to be broadcast.
 			case FundingBatchClosure
 
+			/// One of our HTLCs timed out in a channel, causing us to force close the channel.
+			case HTLCsTimedOut
+
 		}
 
 		public func getValueType() -> ClosureReasonType {
@@ -124,8 +141,14 @@ extension Bindings {
 				case LDKClosureReason_HolderForceClosed:
 					return .HolderForceClosed
 
-				case LDKClosureReason_CooperativeClosure:
-					return .CooperativeClosure
+				case LDKClosureReason_LegacyCooperativeClosure:
+					return .LegacyCooperativeClosure
+
+				case LDKClosureReason_CounterpartyInitiatedCooperativeClosure:
+					return .CounterpartyInitiatedCooperativeClosure
+
+				case LDKClosureReason_LocallyInitiatedCooperativeClosure:
+					return .LocallyInitiatedCooperativeClosure
 
 				case LDKClosureReason_CommitmentTxConfirmed:
 					return .CommitmentTxConfirmed
@@ -147,6 +170,9 @@ extension Bindings {
 
 				case LDKClosureReason_FundingBatchClosure:
 					return .FundingBatchClosure
+
+				case LDKClosureReason_HTLCsTimedOut:
+					return .HTLCsTimedOut
 
 				default:
 					Bindings.print("Error: Invalid value type for ClosureReason! Aborting.", severity: .ERROR)
@@ -235,13 +261,51 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Utility method to constructs a new CooperativeClosure-variant ClosureReason
-		public class func initWithCooperativeClosure() -> ClosureReason {
+		/// Utility method to constructs a new LegacyCooperativeClosure-variant ClosureReason
+		public class func initWithLegacyCooperativeClosure() -> ClosureReason {
 			// native call variable prep
 
 
 			// native method call
-			let nativeCallResult = ClosureReason_cooperative_closure()
+			let nativeCallResult = ClosureReason_legacy_cooperative_closure()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = ClosureReason(
+				cType: nativeCallResult, instantiationContext: "ClosureReason.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Utility method to constructs a new CounterpartyInitiatedCooperativeClosure-variant ClosureReason
+		public class func initWithCounterpartyInitiatedCooperativeClosure() -> ClosureReason {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = ClosureReason_counterparty_initiated_cooperative_closure()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = ClosureReason(
+				cType: nativeCallResult, instantiationContext: "ClosureReason.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Utility method to constructs a new LocallyInitiatedCooperativeClosure-variant ClosureReason
+		public class func initWithLocallyInitiatedCooperativeClosure() -> ClosureReason {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = ClosureReason_locally_initiated_cooperative_closure()
 
 			// cleanup
 
@@ -383,6 +447,25 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = ClosureReason_funding_batch_closure()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = ClosureReason(
+				cType: nativeCallResult, instantiationContext: "ClosureReason.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Utility method to constructs a new HTLCsTimedOut-variant ClosureReason
+		public class func initWithHtlcsTimedOut() -> ClosureReason {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = ClosureReason_htlcs_timed_out()
 
 			// cleanup
 

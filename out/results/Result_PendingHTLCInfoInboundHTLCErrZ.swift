@@ -84,16 +84,12 @@ extension Bindings {
 		}
 
 		/// Creates a new CResult_PendingHTLCInfoInboundHTLCErrZ in the error state.
-		@available(
-			*, deprecated,
-			message: "This method passes the following non-cloneable, but freeable objects by value: `e`."
-		)
 		public class func initWithErr(e: InboundHTLCErr) -> Result_PendingHTLCInfoInboundHTLCErrZ {
 			// native call variable prep
 
 
 			// native method call
-			let nativeCallResult = CResult_PendingHTLCInfoInboundHTLCErrZ_err(e.dangle().cType!)
+			let nativeCallResult = CResult_PendingHTLCInfoInboundHTLCErrZ_err(e.dynamicallyDangledClone().cType!)
 
 			// cleanup
 
@@ -120,6 +116,32 @@ extension Bindings {
 
 			// return value (do some wrapping)
 			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Creates a new CResult_PendingHTLCInfoInboundHTLCErrZ which has the same data as `orig`
+		/// but with all dynamically-allocated buffers duplicated in new buffers.
+		internal func clone() -> Result_PendingHTLCInfoInboundHTLCErrZ {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) {
+					(origPointer: UnsafePointer<LDKCResult_PendingHTLCInfoInboundHTLCErrZ>) in
+					CResult_PendingHTLCInfoInboundHTLCErrZ_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_PendingHTLCInfoInboundHTLCErrZ(
+				cType: nativeCallResult,
+				instantiationContext: "Result_PendingHTLCInfoInboundHTLCErrZ.swift::\(#function):\(#line)")
 
 
 			return returnValue
@@ -152,6 +174,12 @@ extension Bindings {
 			return nil
 		}
 
+
+		internal func danglingClone() -> Result_PendingHTLCInfoInboundHTLCErrZ {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
+		}
 
 		deinit {
 			if Bindings.suspendFreedom || Self.suspendFreedom {

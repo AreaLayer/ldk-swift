@@ -88,6 +88,17 @@ extension Bindings {
 			/// The message included zlib-compressed values, which we don't support.
 			case UnsupportedCompression
 
+			/// Value is validly encoded but is dangerous to use.
+			///
+			/// This is used for things like [`ChannelManager`] deserialization where we want to ensure
+			/// that we don't use a [`ChannelManager`] which is in out of sync with the [`ChannelMonitor`].
+			/// This indicates that there is a critical implementation flaw in the storage implementation
+			/// and it's unsafe to continue.
+			///
+			/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
+			/// [`ChannelMonitor`]: crate::chain::channelmonitor::ChannelMonitor
+			case DangerousValue
+
 		}
 
 		public func getValueType() -> DecodeErrorType {
@@ -112,6 +123,9 @@ extension Bindings {
 
 				case LDKDecodeError_UnsupportedCompression:
 					return .UnsupportedCompression
+
+				case LDKDecodeError_DangerousValue:
+					return .DangerousValue
 
 				default:
 					Bindings.print("Error: Invalid value type for DecodeError! Aborting.", severity: .ERROR)
@@ -283,6 +297,25 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = DecodeError_unsupported_compression()
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = DecodeError(
+				cType: nativeCallResult, instantiationContext: "DecodeError.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Utility method to constructs a new DangerousValue-variant DecodeError
+		public class func initWithDangerousValue() -> DecodeError {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = DecodeError_dangerous_value()
 
 			// cleanup
 

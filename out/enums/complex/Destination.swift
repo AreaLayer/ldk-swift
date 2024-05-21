@@ -170,6 +170,84 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Generates a non-cryptographic 64-bit hash of the Destination.
+		public func hash() -> UInt64 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (oPointer: UnsafePointer<LDKDestination>) in
+					Destination_hash(oPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Checks if two Destinations contain equal inner contents.
+		/// This ignores pointers and is_owned flags and looks at the values in fields.
+		public class func eq(a: Destination, b: Destination) -> Bool {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: a.cType!) { (aPointer: UnsafePointer<LDKDestination>) in
+
+					withUnsafePointer(to: b.cType!) { (bPointer: UnsafePointer<LDKDestination>) in
+						Destination_eq(aPointer, bPointer)
+					}
+
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Attempts to resolve the [`IntroductionNode::DirectedShortChannelId`] of a
+		/// [`Destination::BlindedPath`] to a [`IntroductionNode::NodeId`], if applicable, using the
+		/// provided [`ReadOnlyNetworkGraph`].
+		public func resolve(networkGraph: Bindings.ReadOnlyNetworkGraph) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisArgPointer: UnsafeMutablePointer<LDKDestination>) in
+
+					withUnsafePointer(to: networkGraph.cType!) {
+						(networkGraphPointer: UnsafePointer<LDKReadOnlyNetworkGraph>) in
+						Destination_resolve(thisArgPointer, networkGraphPointer)
+					}
+
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 
 		public func getValueAsNode() -> [UInt8]? {
 			if self.cType?.tag != LDKDestination_Node {

@@ -442,10 +442,87 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// The channel public keys and other parameters needed to generate a spending transaction or
+		/// to provide to a re-derived signer through [`ChannelSigner::provide_channel_parameters`].
+		///
+		/// Added as optional, but always `Some` if the descriptor was produced in v0.0.123 or later.
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func getChannelTransactionParameters() -> ChannelTransactionParameters? {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) {
+					(thisPtrPointer: UnsafePointer<LDKDelayedPaymentOutputDescriptor>) in
+					DelayedPaymentOutputDescriptor_get_channel_transaction_parameters(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKChannelTransactionParameters
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
+
+
+			// return value (do some wrapping)
+			let returnValue = ChannelTransactionParameters(
+				cType: nativeCallResult,
+				instantiationContext: "DelayedPaymentOutputDescriptor.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// The channel public keys and other parameters needed to generate a spending transaction or
+		/// to provide to a re-derived signer through [`ChannelSigner::provide_channel_parameters`].
+		///
+		/// Added as optional, but always `Some` if the descriptor was produced in v0.0.123 or later.
+		///
+		/// Note that val (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func setChannelTransactionParameters(val: ChannelTransactionParameters) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) {
+					(thisPtrPointer: UnsafeMutablePointer<LDKDelayedPaymentOutputDescriptor>) in
+					DelayedPaymentOutputDescriptor_set_channel_transaction_parameters(
+						thisPtrPointer, val.dynamicallyDangledClone().cType!)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// Constructs a new DelayedPaymentOutputDescriptor given each field
+		///
+		/// Note that channel_transaction_parameters_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public init(
 			outpointArg: OutPoint, perCommitmentPointArg: [UInt8], toSelfDelayArg: UInt16, outputArg: TxOut,
-			revocationPubkeyArg: RevocationKey, channelKeysIdArg: [UInt8], channelValueSatoshisArg: UInt64
+			revocationPubkeyArg: RevocationKey, channelKeysIdArg: [UInt8], channelValueSatoshisArg: UInt64,
+			channelTransactionParametersArg: ChannelTransactionParameters
 		) {
 			// native call variable prep
 
@@ -462,7 +539,8 @@ extension Bindings {
 			let nativeCallResult = DelayedPaymentOutputDescriptor_new(
 				outpointArg.dynamicallyDangledClone().cType!, perCommitmentPointArgPrimitiveWrapper.cType!,
 				toSelfDelayArg, outputArg.danglingClone().cType!, revocationPubkeyArg.dynamicallyDangledClone().cType!,
-				channelKeysIdArgPrimitiveWrapper.cType!, channelValueSatoshisArg)
+				channelKeysIdArgPrimitiveWrapper.cType!, channelValueSatoshisArg,
+				channelTransactionParametersArg.dynamicallyDangledClone().cType!)
 
 			// cleanup
 

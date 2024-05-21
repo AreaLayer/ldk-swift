@@ -77,6 +77,138 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// The block's hash
+		public func getBlockHash() -> [UInt8]? {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKBestBlock>) in
+					BestBlock_get_block_hash(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+			guard let nativeCallResult = nativeCallResult else {
+				return nil
+			}
+
+
+			// return value (do some wrapping)
+			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+
+
+			return returnValue
+		}
+
+		/// The block's hash
+		public func setBlockHash(val: [UInt8]) {
+			// native call variable prep
+
+			let valPrimitiveWrapper = ThirtyTwoBytes(
+				value: val, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKBestBlock>) in
+					BestBlock_set_block_hash(thisPtrPointer, valPrimitiveWrapper.cType!)
+				}
+
+
+			// cleanup
+
+			// for elided types, we need this
+			valPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// The height at which the block was confirmed.
+		public func getHeight() -> UInt32 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKBestBlock>) in
+					BestBlock_get_height(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// The height at which the block was confirmed.
+		public func setHeight(val: UInt32) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKBestBlock>) in
+					BestBlock_set_height(thisPtrPointer, val)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Constructs a new BestBlock given each field
+		public init(blockHashArg: [UInt8], heightArg: UInt32) {
+			// native call variable prep
+
+			let blockHashArgPrimitiveWrapper = ThirtyTwoBytes(
+				value: blockHashArg, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult = BestBlock_new(blockHashArgPrimitiveWrapper.cType!, heightArg)
+
+			// cleanup
+
+			// for elided types, we need this
+			blockHashArgPrimitiveWrapper.noOpRetain()
+
+			self.initialCFreeability = nativeCallResult.is_owned
+
+
+			/*
+						// return value (do some wrapping)
+						let returnValue = BestBlock(cType: nativeCallResult, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
+						*/
+
+
+			self.cType = nativeCallResult
+
+			Self.instanceCounter += 1
+			self.instanceNumber = Self.instanceCounter
+			super.init(conflictAvoidingVariableName: 0, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
+
+
+		}
+
 		/// Creates a copy of the BestBlock
 		internal func clone() -> BestBlock {
 			// native call variable prep
@@ -95,6 +227,28 @@ extension Bindings {
 			// return value (do some wrapping)
 			let returnValue = BestBlock(
 				cType: nativeCallResult, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Generates a non-cryptographic 64-bit hash of the BestBlock.
+		public func hash() -> UInt64 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (oPointer: UnsafePointer<LDKBestBlock>) in
+					BestBlock_hash(oPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
 
 
 			return returnValue
@@ -148,49 +302,15 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Returns a `BestBlock` as identified by the given block hash and height.
-		public init(blockHash: [UInt8], height: UInt32) {
-			// native call variable prep
-
-			let blockHashPrimitiveWrapper = ThirtyTwoBytes(
-				value: blockHash, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
-
-
-			// native method call
-			let nativeCallResult = BestBlock_new(blockHashPrimitiveWrapper.cType!, height)
-
-			// cleanup
-
-			// for elided types, we need this
-			blockHashPrimitiveWrapper.noOpRetain()
-
-			self.initialCFreeability = nativeCallResult.is_owned
-
-
-			/*
-						// return value (do some wrapping)
-						let returnValue = BestBlock(cType: nativeCallResult, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
-						*/
-
-
-			self.cType = nativeCallResult
-
-			Self.instanceCounter += 1
-			self.instanceNumber = Self.instanceCounter
-			super.init(conflictAvoidingVariableName: 0, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
-
-
-		}
-
-		/// Returns the best block hash.
-		public func blockHash() -> [UInt8] {
+		/// Serialize the BestBlock object into a byte array which can be read by BestBlock_read
+		public func write() -> [UInt8] {
 			// native call variable prep
 
 
 			// native method call
 			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKBestBlock>) in
-					BestBlock_block_hash(thisArgPointer)
+				withUnsafePointer(to: self.cType!) { (objPointer: UnsafePointer<LDKBestBlock>) in
+					BestBlock_write(objPointer)
 				}
 
 
@@ -198,7 +318,7 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = ThirtyTwoBytes(
+			let returnValue = Vec_u8Z(
 				cType: nativeCallResult, instantiationContext: "BestBlock.swift::\(#function):\(#line)", anchor: self
 			)
 			.dangle(false).getValue()
@@ -207,23 +327,26 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Returns the best block height.
-		public func height() -> UInt32 {
+		/// Read a BestBlock from a byte array, created by BestBlock_write
+		public class func read(ser: [UInt8]) -> Result_BestBlockDecodeErrorZ {
 			// native call variable prep
+
+			let serPrimitiveWrapper = u8slice(
+				value: ser, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
 
 
 			// native method call
-			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKBestBlock>) in
-					BestBlock_height(thisArgPointer)
-				}
-
+			let nativeCallResult = BestBlock_read(serPrimitiveWrapper.cType!)
 
 			// cleanup
 
+			// for elided types, we need this
+			serPrimitiveWrapper.noOpRetain()
+
 
 			// return value (do some wrapping)
-			let returnValue = nativeCallResult
+			let returnValue = Result_BestBlockDecodeErrorZ(
+				cType: nativeCallResult, instantiationContext: "BestBlock.swift::\(#function):\(#line)")
 
 
 			return returnValue

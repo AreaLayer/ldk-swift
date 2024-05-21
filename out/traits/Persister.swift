@@ -7,11 +7,15 @@ import Foundation
 
 
 /// Trait that handles persisting a [`ChannelManager`], [`NetworkGraph`], and [`WriteableScore`] to disk.
+///
+/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
 public typealias Persister = Bindings.Persister
 
 extension Bindings {
 
 	/// Trait that handles persisting a [`ChannelManager`], [`NetworkGraph`], and [`WriteableScore`] to disk.
+	///
+	/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
 	open class Persister: NativeTraitWrapper {
 
 
@@ -174,6 +178,8 @@ extension Bindings {
 
 
 		/// Persist the given ['ChannelManager'] to disk, returning an error if persistence failed.
+		///
+		/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
 		open func persistManager(channelManager: ChannelManager) -> Result_NoneIOErrorZ {
 
 			Bindings.print(
@@ -235,6 +241,8 @@ extension Bindings {
 	internal class NativelyImplementedPersister: Persister {
 
 		/// Persist the given ['ChannelManager'] to disk, returning an error if persistence failed.
+		///
+		/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
 		public override func persistManager(channelManager: ChannelManager) -> Result_NoneIOErrorZ {
 			// native call variable prep
 

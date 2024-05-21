@@ -66,7 +66,7 @@ extension Bindings {
 
 			let rustArray = array.map { (currentValueDepth1: Future) -> LDKFuture in
 
-				return currentValueDepth1.dynamicallyDangledClone().cType!
+				return currentValueDepth1.dangle().cType!
 			}
 
 

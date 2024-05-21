@@ -78,7 +78,7 @@ extension Bindings {
 		}
 
 		/// The `channel_id` of the channel over which the HTLC was received.
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -91,37 +91,30 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "ClaimedHTLC.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The `channel_id` of the channel over which the HTLC was received.
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "ClaimedHTLC.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKClaimedHTLC>) in
-					ClaimedHTLC_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					ClaimedHTLC_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -347,13 +340,10 @@ extension Bindings {
 
 		/// Constructs a new ClaimedHTLC given each field
 		public init(
-			channelIdArg: [UInt8], userChannelIdArg: [UInt8], cltvExpiryArg: UInt32, valueMsatArg: UInt64,
+			channelIdArg: ChannelId, userChannelIdArg: [UInt8], cltvExpiryArg: UInt32, valueMsatArg: UInt64,
 			counterpartySkimmedFeeMsatArg: UInt64
 		) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "ClaimedHTLC.swift::\(#function):\(#line)")
 
 			let userChannelIdArgPrimitiveWrapper = U128(
 				value: userChannelIdArg, instantiationContext: "ClaimedHTLC.swift::\(#function):\(#line)")
@@ -361,13 +351,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = ClaimedHTLC_new(
-				channelIdArgPrimitiveWrapper.cType!, userChannelIdArgPrimitiveWrapper.cType!, cltvExpiryArg,
+				channelIdArg.dynamicallyDangledClone().cType!, userChannelIdArgPrimitiveWrapper.cType!, cltvExpiryArg,
 				valueMsatArg, counterpartySkimmedFeeMsatArg)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			userChannelIdArgPrimitiveWrapper.noOpRetain()

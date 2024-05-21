@@ -163,6 +163,78 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// The channel ID associated with these updates.
+		///
+		/// Will be `None` for `ChannelMonitorUpdate`s constructed on LDK versions prior to 0.0.121 and
+		/// always `Some` otherwise.
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func getChannelId() -> ChannelId? {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKChannelMonitorUpdate>) in
+					ChannelMonitorUpdate_get_channel_id(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKChannelId
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
+
+
+			// return value (do some wrapping)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "ChannelMonitorUpdate.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// The channel ID associated with these updates.
+		///
+		/// Will be `None` for `ChannelMonitorUpdate`s constructed on LDK versions prior to 0.0.121 and
+		/// always `Some` otherwise.
+		///
+		/// Note that val (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func setChannelId(val: ChannelId) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) {
+					(thisPtrPointer: UnsafeMutablePointer<LDKChannelMonitorUpdate>) in
+					ChannelMonitorUpdate_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// Creates a copy of the ChannelMonitorUpdate
 		internal func clone() -> ChannelMonitorUpdate {
 			// native call variable prep

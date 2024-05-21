@@ -83,7 +83,7 @@ extension Bindings {
 		}
 
 		/// The channel ID
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -96,38 +96,32 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "AnnouncementSignatures.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "AnnouncementSignatures.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) {
 					(thisPtrPointer: UnsafeMutablePointer<LDKAnnouncementSignatures>) in
-					AnnouncementSignatures_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					AnnouncementSignatures_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -294,12 +288,9 @@ extension Bindings {
 
 		/// Constructs a new AnnouncementSignatures given each field
 		public init(
-			channelIdArg: [UInt8], shortChannelIdArg: UInt64, nodeSignatureArg: [UInt8], bitcoinSignatureArg: [UInt8]
+			channelIdArg: ChannelId, shortChannelIdArg: UInt64, nodeSignatureArg: [UInt8], bitcoinSignatureArg: [UInt8]
 		) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "AnnouncementSignatures.swift::\(#function):\(#line)")
 
 			let nodeSignatureArgPrimitiveWrapper = ECDSASignature(
 				value: nodeSignatureArg, instantiationContext: "AnnouncementSignatures.swift::\(#function):\(#line)")
@@ -310,13 +301,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = AnnouncementSignatures_new(
-				channelIdArgPrimitiveWrapper.cType!, shortChannelIdArg, nodeSignatureArgPrimitiveWrapper.cType!,
-				bitcoinSignatureArgPrimitiveWrapper.cType!)
+				channelIdArg.dynamicallyDangledClone().cType!, shortChannelIdArg,
+				nodeSignatureArgPrimitiveWrapper.cType!, bitcoinSignatureArgPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			nodeSignatureArgPrimitiveWrapper.noOpRetain()

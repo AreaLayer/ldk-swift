@@ -88,6 +88,29 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Creates a copy of the UnsignedBolt12Invoice
+		internal func clone() -> UnsignedBolt12Invoice {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKUnsignedBolt12Invoice>) in
+					UnsignedBolt12Invoice_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = UnsignedBolt12Invoice(
+				cType: nativeCallResult, instantiationContext: "UnsignedBolt12Invoice.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 		/// Returns the [`TaggedHash`] of the invoice to sign.
 		public func taggedHash() -> TaggedHash {
 			// native call variable prep
@@ -215,8 +238,6 @@ extension Bindings {
 		///
 		/// [`Offer`]: crate::offers::offer::Offer
 		/// [`Offer::amount`]: crate::offers::offer::Offer::amount
-		///
-		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func amount() -> Amount? {
 			// native call variable prep
 
@@ -230,26 +251,13 @@ extension Bindings {
 
 			// cleanup
 
-			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
-			// Type group: RustStruct
-			// Type: LDKAmount
-
-			if nativeCallResult.inner == nil {
-				return nil
-			}
-
-			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
-			if pointerValue == 0 {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Amount(
+			let returnValue = Option_AmountZ(
 				cType: nativeCallResult, instantiationContext: "UnsignedBolt12Invoice.swift::\(#function):\(#line)",
 				anchor: self
 			)
-			.dangle(false)
+			.getValue()
 
 
 			return returnValue
@@ -307,7 +315,9 @@ extension Bindings {
 		/// From [`Offer::description`] or [`Refund::description`].
 		///
 		/// [`Offer::description`]: crate::offers::offer::Offer::description
-		public func description() -> PrintableString {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func description() -> PrintableString? {
 			// native call variable prep
 
 
@@ -319,6 +329,19 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKPrintableString
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
 
 
 			// return value (do some wrapping)
@@ -443,8 +466,6 @@ extension Bindings {
 		/// [`Refund`].
 		///
 		/// [`Offer::supported_quantity`]: crate::offers::offer::Offer::supported_quantity
-		///
-		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func supportedQuantity() -> Quantity? {
 			// native call variable prep
 
@@ -458,26 +479,13 @@ extension Bindings {
 
 			// cleanup
 
-			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
-			// Type group: RustStruct
-			// Type: LDKQuantity
-
-			if nativeCallResult.inner == nil {
-				return nil
-			}
-
-			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
-			if pointerValue == 0 {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Quantity(
+			let returnValue = Option_QuantityZ(
 				cType: nativeCallResult, instantiationContext: "UnsignedBolt12Invoice.swift::\(#function):\(#line)",
 				anchor: self
 			)
-			.dangle(false)
+			.getValue()
 
 
 			return returnValue
@@ -843,6 +851,19 @@ extension Bindings {
 			return returnValue
 		}
 
+
+		internal func danglingClone() -> UnsignedBolt12Invoice {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
+		}
+
+		internal func dynamicallyDangledClone() -> UnsignedBolt12Invoice {
+			let dangledClone = self.clone()
+			// if it's owned, i. e. controlled by Rust, it should dangle on our end
+			dangledClone.dangling = dangledClone.cType!.is_owned
+			return dangledClone
+		}
 
 		internal func setCFreeability(freeable: Bool) -> UnsignedBolt12Invoice {
 			self.cType!.is_owned = freeable

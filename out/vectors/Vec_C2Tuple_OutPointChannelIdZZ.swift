@@ -2,16 +2,15 @@
 	import LDKHeaders
 #endif
 
-/// A dynamically-allocated array of crate::c_types::derived::C3Tuple_OutPointCVec_MonitorEventZPublicKeyZs of arbitrary size.
+/// A dynamically-allocated array of crate::c_types::derived::C2Tuple_OutPointChannelIdZs of arbitrary size.
 /// This corresponds to std::vector in C++
-internal typealias Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ = Bindings
-	.Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ
+internal typealias Vec_C2Tuple_OutPointChannelIdZZ = Bindings.Vec_C2Tuple_OutPointChannelIdZZ
 
 extension Bindings {
 
-	/// A dynamically-allocated array of crate::c_types::derived::C3Tuple_OutPointCVec_MonitorEventZPublicKeyZs of arbitrary size.
+	/// A dynamically-allocated array of crate::c_types::derived::C2Tuple_OutPointChannelIdZs of arbitrary size.
 	/// This corresponds to std::vector in C++
-	internal class Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ: NativeTypeWrapper {
+	internal class Vec_C2Tuple_OutPointChannelIdZZ: NativeTypeWrapper {
 
 
 		/// Set to false to suppress an individual type's deinit log statements.
@@ -26,9 +25,9 @@ extension Bindings {
 		private static var instanceCounter: UInt = 0
 		internal let instanceNumber: UInt
 
-		internal var cType: LDKCVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ?
+		internal var cType: LDKCVec_C2Tuple_OutPointChannelIdZZ?
 
-		internal init(cType: LDKCVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ, instantiationContext: String) {
+		internal init(cType: LDKCVec_C2Tuple_OutPointChannelIdZZ, instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -37,8 +36,7 @@ extension Bindings {
 		}
 
 		internal init(
-			cType: LDKCVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ, instantiationContext: String,
-			anchor: NativeTypeWrapper
+			cType: LDKCVec_C2Tuple_OutPointChannelIdZZ, instantiationContext: String, anchor: NativeTypeWrapper
 		) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
@@ -50,8 +48,8 @@ extension Bindings {
 		}
 
 		internal init(
-			cType: LDKCVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ, instantiationContext: String,
-			anchor: NativeTypeWrapper, dangle: Bool = false
+			cType: LDKCVec_C2Tuple_OutPointChannelIdZZ, instantiationContext: String, anchor: NativeTypeWrapper,
+			dangle: Bool = false
 		) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
@@ -63,20 +61,17 @@ extension Bindings {
 		}
 
 
-		internal init(array: [(OutPoint, [MonitorEvent], [UInt8])], instantiationContext: String) {
+		internal init(array: [(OutPoint, ChannelId)], instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 
 
-			let rustArray = array.map {
-				(currentValueDepth1: (OutPoint, [MonitorEvent], [UInt8]))
-					-> LDKC3Tuple_OutPointCVec_MonitorEventZPublicKeyZ in
+			let rustArray = array.map { (currentValueDepth1: (OutPoint, ChannelId)) -> LDKC2Tuple_OutPointChannelIdZ in
 
-				let currentValueDepth1Tuple = Tuple_OutPointCVec_MonitorEventZPublicKeyZ(
+				let currentValueDepth1Tuple = Tuple_OutPointChannelIdZ(
 					tuple: currentValueDepth1,
-					instantiationContext:
-						"Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ.swift::\(#function):\(#line)"
+					instantiationContext: "Vec_C2Tuple_OutPointChannelIdZZ.swift::\(#function):\(#line)"
 				)
 				.danglingClone()
 
@@ -84,18 +79,16 @@ extension Bindings {
 			}
 
 
-			let dataContainer = UnsafeMutablePointer<LDKC3Tuple_OutPointCVec_MonitorEventZPublicKeyZ>
-				.allocate(capacity: array.count)
+			let dataContainer = UnsafeMutablePointer<LDKC2Tuple_OutPointChannelIdZ>.allocate(capacity: array.count)
 			dataContainer.initialize(from: rustArray, count: array.count)
 
-			let vector = LDKCVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ(
-				data: dataContainer, datalen: UInt(array.count))
+			let vector = LDKCVec_C2Tuple_OutPointChannelIdZZ(data: dataContainer, datalen: UInt(array.count))
 			self.cType = vector
 		}
 
-		public func getValue() -> [(OutPoint, [MonitorEvent], [UInt8])] {
+		public func getValue() -> [(OutPoint, ChannelId)] {
 
-			var array = [LDKC3Tuple_OutPointCVec_MonitorEventZPublicKeyZ]()
+			var array = [LDKC2Tuple_OutPointChannelIdZ]()
 
 
 			for index1 in 0..<Int(self.cType!.datalen) {
@@ -104,13 +97,10 @@ extension Bindings {
 			}
 
 
-			let swiftArray = array.map {
-				(currentCType: LDKC3Tuple_OutPointCVec_MonitorEventZPublicKeyZ) -> (OutPoint, [MonitorEvent], [UInt8])
-				in
-				Tuple_OutPointCVec_MonitorEventZPublicKeyZ(
+			let swiftArray = array.map { (currentCType: LDKC2Tuple_OutPointChannelIdZ) -> (OutPoint, ChannelId) in
+				Tuple_OutPointChannelIdZ(
 					cType: currentCType,
-					instantiationContext:
-						"Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ.swift::\(#function):\(#line)"
+					instantiationContext: "Vec_C2Tuple_OutPointChannelIdZZ.swift::\(#function):\(#line)"
 				)
 				.dangle().getValue()
 			}
@@ -124,7 +114,7 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = CVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ_free(self.cType!)
+			let nativeCallResult = CVec_C2Tuple_OutPointChannelIdZZ_free(self.cType!)
 
 			// cleanup
 
@@ -145,14 +135,14 @@ extension Bindings {
 			if !self.dangling {
 				if Self.enableDeinitLogging {
 					Bindings.print(
-						"Freeing Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ \(self.instanceNumber). (Origin: \(self.instantiationContext))"
+						"Freeing Vec_C2Tuple_OutPointChannelIdZZ \(self.instanceNumber). (Origin: \(self.instantiationContext))"
 					)
 				}
 
 				self.free()
 			} else if Self.enableDeinitLogging {
 				Bindings.print(
-					"Not freeing Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
+					"Not freeing Vec_C2Tuple_OutPointChannelIdZZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
 				)
 			}
 		}

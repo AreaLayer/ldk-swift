@@ -3,16 +3,12 @@
 #endif
 
 /// A simple future which can complete once, and calls some callback(s) when it does so.
-///
-/// Clones can be made and all futures cloned from the same source will complete at the same time.
 public typealias Future = Bindings.Future
 
 extension Bindings {
 
 
 	/// A simple future which can complete once, and calls some callback(s) when it does so.
-	///
-	/// Clones can be made and all futures cloned from the same source will complete at the same time.
 	public class Future: NativeTypeWrapper {
 
 		let initialCFreeability: Bool
@@ -79,29 +75,6 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Creates a copy of the Future
-		internal func clone() -> Future {
-			// native call variable prep
-
-
-			// native method call
-			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKFuture>) in
-					Future_clone(origPointer)
-				}
-
-
-			// cleanup
-
-
-			// return value (do some wrapping)
-			let returnValue = Future(
-				cType: nativeCallResult, instantiationContext: "Future.swift::\(#function):\(#line)")
-
-
-			return returnValue
-		}
-
 		/// Registers a callback to be called upon completion of this future. If the future has already
 		/// completed, the callback will be called immediately.
 		public func registerCallbackFn(callback: FutureCallback) {
@@ -131,7 +104,11 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = Future_wait(self.dynamicallyDangledClone().cType!)
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKFuture>) in
+					Future_wait(thisArgPointer)
+				}
+
 
 			// cleanup
 
@@ -151,7 +128,11 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = Future_wait_timeout(self.dynamicallyDangledClone().cType!, maxWait)
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKFuture>) in
+					Future_wait_timeout(thisArgPointer, maxWait)
+				}
+
 
 			// cleanup
 
@@ -174,19 +155,6 @@ extension Bindings {
 			return returnValue
 		}
 
-
-		internal func danglingClone() -> Future {
-			let dangledClone = self.clone()
-			dangledClone.dangling = true
-			return dangledClone
-		}
-
-		internal func dynamicallyDangledClone() -> Future {
-			let dangledClone = self.clone()
-			// if it's owned, i. e. controlled by Rust, it should dangle on our end
-			dangledClone.dangling = dangledClone.cType!.is_owned
-			return dangledClone
-		}
 
 		internal func setCFreeability(freeable: Bool) -> Future {
 			self.cType!.is_owned = freeable

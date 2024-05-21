@@ -82,7 +82,7 @@ extension Bindings {
 		}
 
 		/// The channel ID
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -95,37 +95,31 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "UpdateAddHTLC.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "UpdateAddHTLC.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKUpdateAddHTLC>) in
-					UpdateAddHTLC_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					UpdateAddHTLC_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -499,14 +493,11 @@ extension Bindings {
 		///
 		/// Note that blinding_point_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public init(
-			channelIdArg: [UInt8], htlcIdArg: UInt64, amountMsatArg: UInt64, paymentHashArg: [UInt8],
+			channelIdArg: ChannelId, htlcIdArg: UInt64, amountMsatArg: UInt64, paymentHashArg: [UInt8],
 			cltvExpiryArg: UInt32, skimmedFeeMsatArg: UInt64?, onionRoutingPacketArg: OnionPacket,
 			blindingPointArg: [UInt8]
 		) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "UpdateAddHTLC.swift::\(#function):\(#line)")
 
 			let paymentHashArgPrimitiveWrapper = ThirtyTwoBytes(
 				value: paymentHashArg, instantiationContext: "UpdateAddHTLC.swift::\(#function):\(#line)")
@@ -522,14 +513,11 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = UpdateAddHTLC_new(
-				channelIdArgPrimitiveWrapper.cType!, htlcIdArg, amountMsatArg, paymentHashArgPrimitiveWrapper.cType!,
-				cltvExpiryArg, skimmedFeeMsatArgOption.cType!, onionRoutingPacketArg.dynamicallyDangledClone().cType!,
-				blindingPointArgPrimitiveWrapper.cType!)
+				channelIdArg.dynamicallyDangledClone().cType!, htlcIdArg, amountMsatArg,
+				paymentHashArgPrimitiveWrapper.cType!, cltvExpiryArg, skimmedFeeMsatArgOption.cType!,
+				onionRoutingPacketArg.dynamicallyDangledClone().cType!, blindingPointArgPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			paymentHashArgPrimitiveWrapper.noOpRetain()

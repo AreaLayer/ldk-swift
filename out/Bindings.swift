@@ -400,6 +400,81 @@ public class Bindings {
 		return returnValue
 	}
 
+	/// Extracts the block height (most significant 3-bytes) from the `short_channel_id`
+	public class func blockFromScid(shortChannelId: UInt64) -> UInt32 {
+		// native call variable prep
+
+
+		// native method call
+		let nativeCallResult = block_from_scid(shortChannelId)
+
+		// cleanup
+
+
+		// return value (do some wrapping)
+		let returnValue = nativeCallResult
+
+
+		return returnValue
+	}
+
+	/// Extracts the tx index (bytes [2..4]) from the `short_channel_id`
+	public class func txIndexFromScid(shortChannelId: UInt64) -> UInt32 {
+		// native call variable prep
+
+
+		// native method call
+		let nativeCallResult = tx_index_from_scid(shortChannelId)
+
+		// cleanup
+
+
+		// return value (do some wrapping)
+		let returnValue = nativeCallResult
+
+
+		return returnValue
+	}
+
+	/// Extracts the vout (bytes [0..2]) from the `short_channel_id`
+	public class func voutFromScid(shortChannelId: UInt64) -> UInt16 {
+		// native call variable prep
+
+
+		// native method call
+		let nativeCallResult = vout_from_scid(shortChannelId)
+
+		// cleanup
+
+
+		// return value (do some wrapping)
+		let returnValue = nativeCallResult
+
+
+		return returnValue
+	}
+
+	/// Constructs a `short_channel_id` using the components pieces. Results in an error
+	/// if the block height, tx index, or vout index overflow the maximum sizes.
+	public class func scidFromParts(block: UInt64, txIndex: UInt64, voutIndex: UInt64) -> Result_u64ShortChannelIdErrorZ
+	{
+		// native call variable prep
+
+
+		// native method call
+		let nativeCallResult = scid_from_parts(block, txIndex, voutIndex)
+
+		// cleanup
+
+
+		// return value (do some wrapping)
+		let returnValue = Result_u64ShortChannelIdErrorZ(
+			cType: nativeCallResult, instantiationContext: "Bindings.swift::\(#function):\(#line)")
+
+
+		return returnValue
+	}
+
 	/// Peel one layer off an incoming onion, returning a [`PendingHTLCInfo`] that contains information
 	/// about the intended next-hop for the HTLC.
 	///
@@ -467,6 +542,41 @@ public class Bindings {
 
 
 		try! returnValue.addAnchor(anchor: config)
+		return returnValue
+	}
+
+	/// Adds a tweak to a public key to derive a new public key.
+	///
+	/// May panic if `tweak` is not the output of a SHA-256 hash.
+	public class func addPublicKeyTweak(basePoint: [UInt8], tweak: [UInt8]) -> [UInt8] {
+		// native call variable prep
+
+		let basePointPrimitiveWrapper = PublicKey(
+			value: basePoint, instantiationContext: "Bindings.swift::\(#function):\(#line)")
+
+		let tupledTweak = Bindings.arrayToUInt8Tuple32(array: tweak)
+
+
+		// native method call
+		let nativeCallResult =
+			withUnsafePointer(to: tupledTweak) { (tupledTweakPointer: UnsafePointer<UInt8Tuple32>) in
+				add_public_key_tweak(basePointPrimitiveWrapper.cType!, tupledTweakPointer)
+			}
+
+
+		// cleanup
+
+		// for elided types, we need this
+		basePointPrimitiveWrapper.noOpRetain()
+
+
+		// return value (do some wrapping)
+		let returnValue = PublicKey(
+			cType: nativeCallResult, instantiationContext: "Bindings.swift::\(#function):\(#line)"
+		)
+		.getValue()
+
+
 		return returnValue
 	}
 
@@ -1392,14 +1502,16 @@ public class Bindings {
 	}
 
 	/// Creates an [`OnionMessage`] with the given `contents` for sending to the destination of
-	/// `path`.
+	/// `path`, first calling [`Destination::resolve`] on `path.destination` with the given
+	/// [`ReadOnlyNetworkGraph`].
 	///
 	/// Returns the node id of the peer to send the message to, the message itself, and any addresses
-	/// need to connect to the first node.
+	/// needed to connect to the first node.
 	///
 	/// Note that reply_path (or a relevant inner pointer) may be NULL or all-0s to represent None
-	public class func createOnionMessage(
-		entropySource: EntropySource, nodeSigner: NodeSigner, path: OnionMessagePath, contents: OnionMessageContents,
+	public class func createOnionMessageResolvingDestination(
+		entropySource: EntropySource, nodeSigner: NodeSigner, nodeIdLookup: NodeIdLookUp,
+		networkGraph: ReadOnlyNetworkGraph, path: OnionMessagePath, contents: OnionMessageContents,
 		replyPath: BlindedPath
 	) -> Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ {
 		// native call variable prep
@@ -1412,9 +1524,73 @@ public class Bindings {
 
 				withUnsafePointer(to: nodeSigner.activate().cType!) {
 					(nodeSignerPointer: UnsafePointer<LDKNodeSigner>) in
-					create_onion_message(
-						entropySourcePointer, nodeSignerPointer, path.dynamicallyDangledClone().cType!,
-						contents.activate().cType!, replyPath.dynamicallyDangledClone().cType!)
+
+					withUnsafePointer(to: nodeIdLookup.activate().cType!) {
+						(nodeIdLookupPointer: UnsafePointer<LDKNodeIdLookUp>) in
+
+						withUnsafePointer(to: networkGraph.cType!) {
+							(networkGraphPointer: UnsafePointer<LDKReadOnlyNetworkGraph>) in
+							create_onion_message_resolving_destination(
+								entropySourcePointer, nodeSignerPointer, nodeIdLookupPointer, networkGraphPointer,
+								path.dynamicallyDangledClone().cType!, contents.activate().cType!,
+								replyPath.dynamicallyDangledClone().cType!)
+						}
+
+					}
+
+				}
+
+			}
+
+
+		// cleanup
+
+
+		// return value (do some wrapping)
+		let returnValue = Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ(
+			cType: nativeCallResult, instantiationContext: "Bindings.swift::\(#function):\(#line)")
+
+
+		try! returnValue.addAnchor(anchor: networkGraph)
+		return returnValue
+	}
+
+	/// Creates an [`OnionMessage`] with the given `contents` for sending to the destination of
+	/// `path`.
+	///
+	/// Returns the node id of the peer to send the message to, the message itself, and any addresses
+	/// needed to connect to the first node.
+	///
+	/// Returns [`SendError::UnresolvedIntroductionNode`] if:
+	/// - `destination` contains a blinded path with an [`IntroductionNode::DirectedShortChannelId`],
+	/// - unless it can be resolved by [`NodeIdLookUp::next_node_id`].
+	/// Use [`create_onion_message_resolving_destination`] instead to resolve the introduction node
+	/// first with a [`ReadOnlyNetworkGraph`].
+	///
+	/// Note that reply_path (or a relevant inner pointer) may be NULL or all-0s to represent None
+	public class func createOnionMessage(
+		entropySource: EntropySource, nodeSigner: NodeSigner, nodeIdLookup: NodeIdLookUp, path: OnionMessagePath,
+		contents: OnionMessageContents, replyPath: BlindedPath
+	) -> Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ {
+		// native call variable prep
+
+
+		// native method call
+		let nativeCallResult =
+			withUnsafePointer(to: entropySource.activate().cType!) {
+				(entropySourcePointer: UnsafePointer<LDKEntropySource>) in
+
+				withUnsafePointer(to: nodeSigner.activate().cType!) {
+					(nodeSignerPointer: UnsafePointer<LDKNodeSigner>) in
+
+					withUnsafePointer(to: nodeIdLookup.activate().cType!) {
+						(nodeIdLookupPointer: UnsafePointer<LDKNodeIdLookUp>) in
+						create_onion_message(
+							entropySourcePointer, nodeSignerPointer, nodeIdLookupPointer,
+							path.dynamicallyDangledClone().cType!, contents.activate().cType!,
+							replyPath.dynamicallyDangledClone().cType!)
+					}
+
 				}
 
 			}
@@ -2034,6 +2210,38 @@ public class Bindings {
 		return returnValue
 	}
 
+	/// Read a C2Tuple_BestBlockOutputSweeperZ from a byte array, created by C2Tuple_BestBlockOutputSweeperZ_write
+	public class func readBestBlockOutputSweeper(
+		ser: [UInt8], argA: BroadcasterInterface, argB: FeeEstimator, argC: Filter?, argD: OutputSpender,
+		argE: ChangeDestinationSource, argF: KVStore, argG: Logger
+	) -> Result_C2Tuple_BestBlockOutputSweeperZDecodeErrorZ {
+		// native call variable prep
+
+		let serPrimitiveWrapper = u8slice(value: ser, instantiationContext: "Bindings.swift::\(#function):\(#line)")
+
+		let argCOption = Option_FilterZ(some: argC, instantiationContext: "Bindings.swift::\(#function):\(#line)")
+			.dangle()
+
+
+		// native method call
+		let nativeCallResult = C2Tuple_BestBlockOutputSweeperZ_read(
+			serPrimitiveWrapper.cType!, argA.activate().cType!, argB.activate().cType!, argCOption.cType!,
+			argD.activate().cType!, argE.activate().cType!, argF.activate().cType!, argG.activate().cType!)
+
+		// cleanup
+
+		// for elided types, we need this
+		serPrimitiveWrapper.noOpRetain()
+
+
+		// return value (do some wrapping)
+		let returnValue = Result_C2Tuple_BestBlockOutputSweeperZDecodeErrorZ(
+			cType: nativeCallResult, instantiationContext: "Bindings.swift::\(#function):\(#line)")
+
+
+		return returnValue
+	}
+
 
 	internal typealias UInt8Tuple16 = (
 		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8
@@ -2055,6 +2263,15 @@ public class Bindings {
 		UInt8
 	)
 
+	internal typealias UInt8Tuple64 = (
+		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8
+	)
+
+	internal typealias UInt8Tuple3 = (UInt8, UInt8, UInt8)
+
 	internal typealias UInt8Tuple68 = (
 		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
 		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
@@ -2063,20 +2280,11 @@ public class Bindings {
 		UInt8, UInt8, UInt8, UInt8
 	)
 
-	internal typealias UInt8Tuple64 = (
-		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
-		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
-		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
-		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8
-	)
-
 	internal typealias UInt8Tuple4 = (UInt8, UInt8, UInt8, UInt8)
 
 	internal typealias UInt8Tuple12 = (
 		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8
 	)
-
-	internal typealias UInt8Tuple3 = (UInt8, UInt8, UInt8)
 
 	internal typealias UInt8Tuple80 = (
 		UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
@@ -2157,6 +2365,38 @@ public class Bindings {
 		]
 	}
 
+	internal class func arrayToUInt8Tuple64(array: [UInt8]) -> UInt8Tuple64 {
+		return (
+			array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7], array[8], array[9],
+			array[10], array[11], array[12], array[13], array[14], array[15], array[16], array[17], array[18],
+			array[19], array[20], array[21], array[22], array[23], array[24], array[25], array[26], array[27],
+			array[28], array[29], array[30], array[31], array[32], array[33], array[34], array[35], array[36],
+			array[37], array[38], array[39], array[40], array[41], array[42], array[43], array[44], array[45],
+			array[46], array[47], array[48], array[49], array[50], array[51], array[52], array[53], array[54],
+			array[55], array[56], array[57], array[58], array[59], array[60], array[61], array[62], array[63]
+		)
+	}
+
+	internal class func UInt8Tuple64ToArray(tuple: UInt8Tuple64) -> [UInt8] {
+		return [
+			tuple.0, tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7, tuple.8, tuple.9, tuple.10,
+			tuple.11, tuple.12, tuple.13, tuple.14, tuple.15, tuple.16, tuple.17, tuple.18, tuple.19, tuple.20,
+			tuple.21, tuple.22, tuple.23, tuple.24, tuple.25, tuple.26, tuple.27, tuple.28, tuple.29, tuple.30,
+			tuple.31, tuple.32, tuple.33, tuple.34, tuple.35, tuple.36, tuple.37, tuple.38, tuple.39, tuple.40,
+			tuple.41, tuple.42, tuple.43, tuple.44, tuple.45, tuple.46, tuple.47, tuple.48, tuple.49, tuple.50,
+			tuple.51, tuple.52, tuple.53, tuple.54, tuple.55, tuple.56, tuple.57, tuple.58, tuple.59, tuple.60,
+			tuple.61, tuple.62, tuple.63,
+		]
+	}
+
+	internal class func arrayToUInt8Tuple3(array: [UInt8]) -> UInt8Tuple3 {
+		return (array[0], array[1], array[2])
+	}
+
+	internal class func UInt8Tuple3ToArray(tuple: UInt8Tuple3) -> [UInt8] {
+		return [tuple.0, tuple.1, tuple.2]
+	}
+
 	internal class func arrayToUInt8Tuple68(array: [UInt8]) -> UInt8Tuple68 {
 		return (
 			array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7], array[8], array[9],
@@ -2182,30 +2422,6 @@ public class Bindings {
 		]
 	}
 
-	internal class func arrayToUInt8Tuple64(array: [UInt8]) -> UInt8Tuple64 {
-		return (
-			array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7], array[8], array[9],
-			array[10], array[11], array[12], array[13], array[14], array[15], array[16], array[17], array[18],
-			array[19], array[20], array[21], array[22], array[23], array[24], array[25], array[26], array[27],
-			array[28], array[29], array[30], array[31], array[32], array[33], array[34], array[35], array[36],
-			array[37], array[38], array[39], array[40], array[41], array[42], array[43], array[44], array[45],
-			array[46], array[47], array[48], array[49], array[50], array[51], array[52], array[53], array[54],
-			array[55], array[56], array[57], array[58], array[59], array[60], array[61], array[62], array[63]
-		)
-	}
-
-	internal class func UInt8Tuple64ToArray(tuple: UInt8Tuple64) -> [UInt8] {
-		return [
-			tuple.0, tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7, tuple.8, tuple.9, tuple.10,
-			tuple.11, tuple.12, tuple.13, tuple.14, tuple.15, tuple.16, tuple.17, tuple.18, tuple.19, tuple.20,
-			tuple.21, tuple.22, tuple.23, tuple.24, tuple.25, tuple.26, tuple.27, tuple.28, tuple.29, tuple.30,
-			tuple.31, tuple.32, tuple.33, tuple.34, tuple.35, tuple.36, tuple.37, tuple.38, tuple.39, tuple.40,
-			tuple.41, tuple.42, tuple.43, tuple.44, tuple.45, tuple.46, tuple.47, tuple.48, tuple.49, tuple.50,
-			tuple.51, tuple.52, tuple.53, tuple.54, tuple.55, tuple.56, tuple.57, tuple.58, tuple.59, tuple.60,
-			tuple.61, tuple.62, tuple.63,
-		]
-	}
-
 	internal class func arrayToUInt8Tuple4(array: [UInt8]) -> UInt8Tuple4 {
 		return (array[0], array[1], array[2], array[3])
 	}
@@ -2226,14 +2442,6 @@ public class Bindings {
 			tuple.0, tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7, tuple.8, tuple.9, tuple.10,
 			tuple.11,
 		]
-	}
-
-	internal class func arrayToUInt8Tuple3(array: [UInt8]) -> UInt8Tuple3 {
-		return (array[0], array[1], array[2])
-	}
-
-	internal class func UInt8Tuple3ToArray(tuple: UInt8Tuple3) -> [UInt8] {
-		return [tuple.0, tuple.1, tuple.2]
 	}
 
 	internal class func arrayToUInt8Tuple80(array: [UInt8]) -> UInt8Tuple80 {
@@ -2336,6 +2544,25 @@ func == (tupleA: Bindings.UInt8Tuple33, tupleB: Bindings.UInt8Tuple33) -> Bool {
 		&& tupleA.32 == tupleB.32
 }
 
+func == (tupleA: Bindings.UInt8Tuple64, tupleB: Bindings.UInt8Tuple64) -> Bool {
+	return tupleA.0 == tupleB.0 && tupleA.1 == tupleB.1 && tupleA.2 == tupleB.2 && tupleA.3 == tupleB.3
+		&& tupleA.4 == tupleB.4 && tupleA.5 == tupleB.5 && tupleA.6 == tupleB.6 && tupleA.7 == tupleB.7
+		&& tupleA.8 == tupleB.8 && tupleA.9 == tupleB.9 && tupleA.10 == tupleB.10 && tupleA.11 == tupleB.11
+		&& tupleA.12 == tupleB.12 && tupleA.13 == tupleB.13 && tupleA.14 == tupleB.14 && tupleA.15 == tupleB.15
+		&& tupleA.16 == tupleB.16 && tupleA.17 == tupleB.17 && tupleA.18 == tupleB.18 && tupleA.19 == tupleB.19
+		&& tupleA.20 == tupleB.20 && tupleA.21 == tupleB.21 && tupleA.22 == tupleB.22 && tupleA.23 == tupleB.23
+		&& tupleA.24 == tupleB.24 && tupleA.25 == tupleB.25 && tupleA.26 == tupleB.26 && tupleA.27 == tupleB.27
+		&& tupleA.28 == tupleB.28 && tupleA.29 == tupleB.29 && tupleA.30 == tupleB.30 && tupleA.31 == tupleB.31
+		&& tupleA.32 == tupleB.32 && tupleA.33 == tupleB.33 && tupleA.34 == tupleB.34 && tupleA.35 == tupleB.35
+		&& tupleA.36 == tupleB.36 && tupleA.37 == tupleB.37 && tupleA.38 == tupleB.38 && tupleA.39 == tupleB.39
+		&& tupleA.40 == tupleB.40 && tupleA.41 == tupleB.41 && tupleA.42 == tupleB.42 && tupleA.43 == tupleB.43
+		&& tupleA.44 == tupleB.44 && tupleA.45 == tupleB.45 && tupleA.46 == tupleB.46 && tupleA.47 == tupleB.47
+		&& tupleA.48 == tupleB.48 && tupleA.49 == tupleB.49 && tupleA.50 == tupleB.50 && tupleA.51 == tupleB.51
+		&& tupleA.52 == tupleB.52 && tupleA.53 == tupleB.53 && tupleA.54 == tupleB.54 && tupleA.55 == tupleB.55
+		&& tupleA.56 == tupleB.56 && tupleA.57 == tupleB.57 && tupleA.58 == tupleB.58 && tupleA.59 == tupleB.59
+		&& tupleA.60 == tupleB.60 && tupleA.61 == tupleB.61 && tupleA.62 == tupleB.62 && tupleA.63 == tupleB.63
+}
+
 func == (tupleA: Bindings.UInt8Tuple68, tupleB: Bindings.UInt8Tuple68) -> Bool {
 	return tupleA.0 == tupleB.0 && tupleA.1 == tupleB.1 && tupleA.2 == tupleB.2 && tupleA.3 == tupleB.3
 		&& tupleA.4 == tupleB.4 && tupleA.5 == tupleB.5 && tupleA.6 == tupleB.6 && tupleA.7 == tupleB.7
@@ -2354,25 +2581,6 @@ func == (tupleA: Bindings.UInt8Tuple68, tupleB: Bindings.UInt8Tuple68) -> Bool {
 		&& tupleA.56 == tupleB.56 && tupleA.57 == tupleB.57 && tupleA.58 == tupleB.58 && tupleA.59 == tupleB.59
 		&& tupleA.60 == tupleB.60 && tupleA.61 == tupleB.61 && tupleA.62 == tupleB.62 && tupleA.63 == tupleB.63
 		&& tupleA.64 == tupleB.64 && tupleA.65 == tupleB.65 && tupleA.66 == tupleB.66 && tupleA.67 == tupleB.67
-}
-
-func == (tupleA: Bindings.UInt8Tuple64, tupleB: Bindings.UInt8Tuple64) -> Bool {
-	return tupleA.0 == tupleB.0 && tupleA.1 == tupleB.1 && tupleA.2 == tupleB.2 && tupleA.3 == tupleB.3
-		&& tupleA.4 == tupleB.4 && tupleA.5 == tupleB.5 && tupleA.6 == tupleB.6 && tupleA.7 == tupleB.7
-		&& tupleA.8 == tupleB.8 && tupleA.9 == tupleB.9 && tupleA.10 == tupleB.10 && tupleA.11 == tupleB.11
-		&& tupleA.12 == tupleB.12 && tupleA.13 == tupleB.13 && tupleA.14 == tupleB.14 && tupleA.15 == tupleB.15
-		&& tupleA.16 == tupleB.16 && tupleA.17 == tupleB.17 && tupleA.18 == tupleB.18 && tupleA.19 == tupleB.19
-		&& tupleA.20 == tupleB.20 && tupleA.21 == tupleB.21 && tupleA.22 == tupleB.22 && tupleA.23 == tupleB.23
-		&& tupleA.24 == tupleB.24 && tupleA.25 == tupleB.25 && tupleA.26 == tupleB.26 && tupleA.27 == tupleB.27
-		&& tupleA.28 == tupleB.28 && tupleA.29 == tupleB.29 && tupleA.30 == tupleB.30 && tupleA.31 == tupleB.31
-		&& tupleA.32 == tupleB.32 && tupleA.33 == tupleB.33 && tupleA.34 == tupleB.34 && tupleA.35 == tupleB.35
-		&& tupleA.36 == tupleB.36 && tupleA.37 == tupleB.37 && tupleA.38 == tupleB.38 && tupleA.39 == tupleB.39
-		&& tupleA.40 == tupleB.40 && tupleA.41 == tupleB.41 && tupleA.42 == tupleB.42 && tupleA.43 == tupleB.43
-		&& tupleA.44 == tupleB.44 && tupleA.45 == tupleB.45 && tupleA.46 == tupleB.46 && tupleA.47 == tupleB.47
-		&& tupleA.48 == tupleB.48 && tupleA.49 == tupleB.49 && tupleA.50 == tupleB.50 && tupleA.51 == tupleB.51
-		&& tupleA.52 == tupleB.52 && tupleA.53 == tupleB.53 && tupleA.54 == tupleB.54 && tupleA.55 == tupleB.55
-		&& tupleA.56 == tupleB.56 && tupleA.57 == tupleB.57 && tupleA.58 == tupleB.58 && tupleA.59 == tupleB.59
-		&& tupleA.60 == tupleB.60 && tupleA.61 == tupleB.61 && tupleA.62 == tupleB.62 && tupleA.63 == tupleB.63
 }
 
 func == (tupleA: Bindings.UInt8Tuple12, tupleB: Bindings.UInt8Tuple12) -> Bool {

@@ -500,6 +500,33 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Recover the payee's public key if one was included in the invoice, otherwise return the
+		/// recovered public key from the signature
+		public func getPayeePubKey() -> [UInt8] {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKBolt11Invoice>) in
+					Bolt11Invoice_get_payee_pub_key(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = PublicKey(
+				cType: nativeCallResult, instantiationContext: "Bolt11Invoice.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
 		/// Returns the Duration since the Unix epoch at which the invoice expires.
 		/// Returning None if overflow occurred.
 		public func expiresAt() -> UInt64? {

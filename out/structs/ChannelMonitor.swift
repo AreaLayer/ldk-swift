@@ -247,6 +247,32 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Gets the channel_id of the channel this ChannelMonitor is monitoring for.
+		public func channelId() -> ChannelId {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChannelMonitor>) in
+					ChannelMonitor_channel_id(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "ChannelMonitor.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
 		/// Gets a list of txids, with their output scripts (in the order they appear in the
 		/// transaction), which we must learn about spends of via block_connected().
 		public func getOutputsToWatch() -> [([UInt8], [(UInt32, [UInt8])])] {
@@ -566,21 +592,18 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Used by [`ChannelManager`] deserialization to broadcast the latest holder state if its copy
-		/// of the channel state was out-of-date.
-		///
-		/// You may also use this to broadcast the latest local commitment transaction, either because
+		/// You may use this to broadcast the latest local commitment transaction, either because
 		/// a monitor update failed or because we've fallen behind (i.e. we've received proof that our
 		/// counterparty side knows a revocation secret we gave them that they shouldn't know).
 		///
-		/// Broadcasting these transactions in the second case is UNSAFE, as they allow counterparty
+		/// Broadcasting these transactions in this manner is UNSAFE, as they allow counterparty
 		/// side to punish you. Nevertheless you may want to broadcast them if counterparty doesn't
 		/// close channel with their commitment transaction after a substantial amount of time. Best
 		/// may be to contact the other node operator out-of-band to coordinate other options available
 		/// to you.
-		///
-		/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
-		public func getLatestHolderCommitmentTxn(logger: Logger) -> [[UInt8]] {
+		public func broadcastLatestHolderCommitmentTxn(
+			broadcaster: BroadcasterInterface, feeEstimator: FeeEstimator, logger: Logger
+		) {
 			// native call variable prep
 
 
@@ -588,8 +611,20 @@ extension Bindings {
 			let nativeCallResult =
 				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChannelMonitor>) in
 
-					withUnsafePointer(to: logger.activate().cType!) { (loggerPointer: UnsafePointer<LDKLogger>) in
-						ChannelMonitor_get_latest_holder_commitment_txn(thisArgPointer, loggerPointer)
+					withUnsafePointer(to: broadcaster.activate().cType!) {
+						(broadcasterPointer: UnsafePointer<LDKBroadcasterInterface>) in
+
+						withUnsafePointer(to: feeEstimator.activate().cType!) {
+							(feeEstimatorPointer: UnsafePointer<LDKFeeEstimator>) in
+
+							withUnsafePointer(to: logger.activate().cType!) {
+								(loggerPointer: UnsafePointer<LDKLogger>) in
+								ChannelMonitor_broadcast_latest_holder_commitment_txn(
+									thisArgPointer, broadcasterPointer, feeEstimatorPointer, loggerPointer)
+							}
+
+						}
+
 					}
 
 				}
@@ -599,11 +634,7 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = Vec_TransactionZ(
-				cType: nativeCallResult, instantiationContext: "ChannelMonitor.swift::\(#function):\(#line)",
-				anchor: self
-			)
-			.dangle(false).getValue()
+			let returnValue = nativeCallResult
 
 
 			return returnValue
@@ -934,6 +965,35 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Triggers rebroadcasts of pending claims from a force-closed channel after a transaction
+		/// signature generation failure.
+		public func signerUnblocked(broadcaster: BroadcasterInterface, feeEstimator: FeeEstimator, logger: Logger) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChannelMonitor>) in
+
+					withUnsafePointer(to: logger.activate().cType!) { (loggerPointer: UnsafePointer<LDKLogger>) in
+						ChannelMonitor_signer_unblocked(
+							thisArgPointer, broadcaster.activate().cType!, feeEstimator.activate().cType!, loggerPointer
+						)
+					}
+
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// Returns the descriptors for relevant outputs (i.e., those that we can spend) within the
 		/// transaction if they exist and the transaction has at least [`ANTI_REORG_DELAY`]
 		/// confirmations. For [`SpendableOutputDescriptor::DelayedPaymentOutput`] descriptors to be
@@ -980,6 +1040,36 @@ extension Bindings {
 				anchor: self
 			)
 			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
+		/// Checks if the monitor is fully resolved. Resolved monitor is one that has claimed all of
+		/// its outputs and balances (i.e. [`Self::get_claimable_balances`] returns an empty set).
+		///
+		/// This function returns true only if [`Self::get_claimable_balances`] has been empty for at least
+		/// 4032 blocks as an additional protection against any bugs resulting in spuriously empty balance sets.
+		public func isFullyResolved(logger: Logger) -> Bool {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKChannelMonitor>) in
+
+					withUnsafePointer(to: logger.activate().cType!) { (loggerPointer: UnsafePointer<LDKLogger>) in
+						ChannelMonitor_is_fully_resolved(thisArgPointer, loggerPointer)
+					}
+
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
 
 
 			return returnValue

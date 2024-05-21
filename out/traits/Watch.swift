@@ -137,7 +137,7 @@ extension Bindings {
 			}
 
 			func releasePendingMonitorEventsLambda(this_arg: UnsafeRawPointer?)
-				-> LDKCVec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ
+				-> LDKCVec_C4Tuple_OutPointChannelIdCVec_MonitorEventZPublicKeyZZ
 			{
 				let instance: Watch = Bindings.pointerToInstance(
 					pointer: this_arg!, sourceMarker: "Watch::releasePendingMonitorEventsLambda")
@@ -152,7 +152,7 @@ extension Bindings {
 
 
 				// return value (do some wrapping)
-				let returnValue = Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ(
+				let returnValue = Vec_C4Tuple_OutPointChannelIdCVec_MonitorEventZPublicKeyZZ(
 					array: swiftCallbackResult, instantiationContext: "Watch.swift::init()::\(#function):\(#line)"
 				)
 				.dangleRecursively().cType!
@@ -245,7 +245,7 @@ extension Bindings {
 		///
 		/// For details on asynchronous [`ChannelMonitor`] updating and returning
 		/// [`MonitorEvent::Completed`] here, see [`ChannelMonitorUpdateStatus::InProgress`].
-		open func releasePendingMonitorEvents() -> [(OutPoint, [MonitorEvent], [UInt8])] {
+		open func releasePendingMonitorEvents() -> [(OutPoint, ChannelId, [MonitorEvent], [UInt8])] {
 
 			Bindings.print(
 				"Error: Watch::releasePendingMonitorEvents MUST be overridden! Offending class: \(String(describing: self)). Aborting.",
@@ -371,7 +371,7 @@ extension Bindings {
 		///
 		/// For details on asynchronous [`ChannelMonitor`] updating and returning
 		/// [`MonitorEvent::Completed`] here, see [`ChannelMonitorUpdateStatus::InProgress`].
-		public override func releasePendingMonitorEvents() -> [(OutPoint, [MonitorEvent], [UInt8])] {
+		public override func releasePendingMonitorEvents() -> [(OutPoint, ChannelId, [MonitorEvent], [UInt8])] {
 			// native call variable prep
 
 
@@ -382,7 +382,7 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = Vec_C3Tuple_OutPointCVec_MonitorEventZPublicKeyZZ(
+			let returnValue = Vec_C4Tuple_OutPointChannelIdCVec_MonitorEventZPublicKeyZZ(
 				cType: nativeCallResult, instantiationContext: "Watch.swift::\(#function):\(#line)"
 			)
 			.getValue()

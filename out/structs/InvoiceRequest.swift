@@ -168,8 +168,6 @@ extension Bindings {
 		}
 
 		/// The minimum amount required for a successful payment of a single item.
-		///
-		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func amount() -> Amount? {
 			// native call variable prep
 
@@ -183,26 +181,13 @@ extension Bindings {
 
 			// cleanup
 
-			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
-			// Type group: RustStruct
-			// Type: LDKAmount
-
-			if nativeCallResult.inner == nil {
-				return nil
-			}
-
-			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
-			if pointerValue == 0 {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Amount(
+			let returnValue = Option_AmountZ(
 				cType: nativeCallResult, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)",
 				anchor: self
 			)
-			.dangle(false)
+			.getValue()
 
 
 			return returnValue
@@ -210,7 +195,9 @@ extension Bindings {
 
 		/// A complete description of the purpose of the payment. Intended to be displayed to the user
 		/// but with the caveat that it has not been verified in any way.
-		public func description() -> PrintableString {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func description() -> PrintableString? {
 			// native call variable prep
 
 
@@ -222,6 +209,19 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKPrintableString
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
 
 
 			// return value (do some wrapping)
@@ -376,16 +376,16 @@ extension Bindings {
 			// return value (do some wrapping)
 			let returnValue = Quantity(
 				cType: nativeCallResult, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)",
-				anchor: self
-			)
-			.dangle(false)
+				anchor: self)
 
 
 			return returnValue
 		}
 
 		/// The public key used by the recipient to sign invoices.
-		public func signingPubkey() -> [UInt8] {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func signingPubkey() -> [UInt8]? {
 			// native call variable prep
 
 
@@ -397,6 +397,15 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustPrimitiveWrapper
+			// Type: LDKPublicKey
+
+			if nativeCallResult.compressed_form == Bindings.arrayToUInt8Tuple33(array: [UInt8](repeating: 0, count: 33))
+			{
+				return nil
+			}
 
 
 			// return value (do some wrapping)
@@ -614,29 +623,113 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Signature of the invoice request using [`payer_id`].
+		/// Creates an [`InvoiceBuilder`] for the request with the given required fields and using the
+		/// [`Duration`] since [`std::time::SystemTime::UNIX_EPOCH`] as the creation time.
 		///
-		/// [`payer_id`]: Self::payer_id
-		public func signature() -> [UInt8] {
+		/// See [`InvoiceRequest::respond_with_no_std`] for further details where the aforementioned
+		/// creation time is used for the `created_at` parameter.
+		///
+		/// [`Duration`]: core::time::Duration
+		public func respondWith(paymentPaths: [(BlindedPayInfo, BlindedPath)], paymentHash: [UInt8])
+			-> Result_InvoiceWithExplicitSigningPubkeyBuilderBolt12SemanticErrorZ
+		{
 			// native call variable prep
+
+			let paymentPathsVector = Vec_C2Tuple_BlindedPayInfoBlindedPathZZ(
+				array: paymentPaths, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+			let paymentHashPrimitiveWrapper = ThirtyTwoBytes(
+				value: paymentHash, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKInvoiceRequest>) in
-					InvoiceRequest_signature(thisArgPointer)
+					InvoiceRequest_respond_with(
+						thisArgPointer, paymentPathsVector.cType!, paymentHashPrimitiveWrapper.cType!)
 				}
 
 
 			// cleanup
 
+			// paymentPathsVector.noOpRetain()
+
+			// for elided types, we need this
+			paymentHashPrimitiveWrapper.noOpRetain()
+
 
 			// return value (do some wrapping)
-			let returnValue = SchnorrSignature(
+			let returnValue = Result_InvoiceWithExplicitSigningPubkeyBuilderBolt12SemanticErrorZ(
 				cType: nativeCallResult, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)",
 				anchor: self
 			)
-			.dangle(false).getValue()
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// Creates an [`InvoiceBuilder`] for the request with the given required fields.
+		///
+		/// Unless [`InvoiceBuilder::relative_expiry`] is set, the invoice will expire two hours after
+		/// `created_at`, which is used to set [`Bolt12Invoice::created_at`]. Useful for `no-std` builds
+		/// where [`std::time::SystemTime`] is not available.
+		///
+		/// The caller is expected to remember the preimage of `payment_hash` in order to claim a payment
+		/// for the invoice.
+		///
+		/// The `payment_paths` parameter is useful for maintaining the payment recipient's privacy. It
+		/// must contain one or more elements ordered from most-preferred to least-preferred, if there's
+		/// a preference. Note, however, that any privacy is lost if a public node id was used for
+		/// [`Offer::signing_pubkey`].
+		///
+		/// Errors if the request contains unknown required features.
+		///
+		/// # Note
+		///
+		/// If the originating [`Offer`] was created using [`OfferBuilder::deriving_signing_pubkey`],
+		/// then use [`InvoiceRequest::verify`] and [`VerifiedInvoiceRequest`] methods instead.
+		///
+		/// [`Bolt12Invoice::created_at`]: crate::offers::invoice::Bolt12Invoice::created_at
+		/// [`OfferBuilder::deriving_signing_pubkey`]: crate::offers::offer::OfferBuilder::deriving_signing_pubkey
+		public func respondWithNoStd(
+			paymentPaths: [(BlindedPayInfo, BlindedPath)], paymentHash: [UInt8], createdAt: UInt64
+		) -> Result_InvoiceWithExplicitSigningPubkeyBuilderBolt12SemanticErrorZ {
+			// native call variable prep
+
+			let paymentPathsVector = Vec_C2Tuple_BlindedPayInfoBlindedPathZZ(
+				array: paymentPaths, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)"
+			)
+			.dangle()
+
+			let paymentHashPrimitiveWrapper = ThirtyTwoBytes(
+				value: paymentHash, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKInvoiceRequest>) in
+					InvoiceRequest_respond_with_no_std(
+						thisArgPointer, paymentPathsVector.cType!, paymentHashPrimitiveWrapper.cType!, createdAt)
+				}
+
+
+			// cleanup
+
+			// paymentPathsVector.noOpRetain()
+
+			// for elided types, we need this
+			paymentHashPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_InvoiceWithExplicitSigningPubkeyBuilderBolt12SemanticErrorZ(
+				cType: nativeCallResult, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
@@ -664,6 +757,34 @@ extension Bindings {
 			// return value (do some wrapping)
 			let returnValue = Result_VerifiedInvoiceRequestNoneZ(
 				cType: nativeCallResult, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Signature of the invoice request using [`payer_id`].
+		///
+		/// [`payer_id`]: Self::payer_id
+		public func signature() -> [UInt8] {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKInvoiceRequest>) in
+					InvoiceRequest_signature(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = SchnorrSignature(
+				cType: nativeCallResult, instantiationContext: "InvoiceRequest.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false).getValue()
 
 
 			return returnValue

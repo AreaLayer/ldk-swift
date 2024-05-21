@@ -82,7 +82,7 @@ extension Bindings {
 		}
 
 		/// The channel ID
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -95,38 +95,32 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "ChannelReestablish.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "ChannelReestablish.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) {
 					(thisPtrPointer: UnsafeMutablePointer<LDKChannelReestablish>) in
-					ChannelReestablish_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					ChannelReestablish_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -394,14 +388,11 @@ extension Bindings {
 
 		/// Constructs a new ChannelReestablish given each field
 		public init(
-			channelIdArg: [UInt8], nextLocalCommitmentNumberArg: UInt64, nextRemoteCommitmentNumberArg: UInt64,
+			channelIdArg: ChannelId, nextLocalCommitmentNumberArg: UInt64, nextRemoteCommitmentNumberArg: UInt64,
 			yourLastPerCommitmentSecretArg: [UInt8], myCurrentPerCommitmentPointArg: [UInt8],
 			nextFundingTxidArg: [UInt8]?
 		) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "ChannelReestablish.swift::\(#function):\(#line)")
 
 			let yourLastPerCommitmentSecretArgPrimitiveWrapper = ThirtyTwoBytes(
 				value: yourLastPerCommitmentSecretArg,
@@ -419,14 +410,11 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = ChannelReestablish_new(
-				channelIdArgPrimitiveWrapper.cType!, nextLocalCommitmentNumberArg, nextRemoteCommitmentNumberArg,
-				yourLastPerCommitmentSecretArgPrimitiveWrapper.cType!,
+				channelIdArg.dynamicallyDangledClone().cType!, nextLocalCommitmentNumberArg,
+				nextRemoteCommitmentNumberArg, yourLastPerCommitmentSecretArgPrimitiveWrapper.cType!,
 				myCurrentPerCommitmentPointArgPrimitiveWrapper.cType!, nextFundingTxidArgOption.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			yourLastPerCommitmentSecretArgPrimitiveWrapper.noOpRetain()

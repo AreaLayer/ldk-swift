@@ -282,6 +282,79 @@ extension Bindings {
 
 		}
 
+		/// Creates a copy of the InboundHTLCErr
+		internal func clone() -> InboundHTLCErr {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKInboundHTLCErr>) in
+					InboundHTLCErr_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = InboundHTLCErr(
+				cType: nativeCallResult, instantiationContext: "InboundHTLCErr.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Generates a non-cryptographic 64-bit hash of the InboundHTLCErr.
+		public func hash() -> UInt64 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (oPointer: UnsafePointer<LDKInboundHTLCErr>) in
+					InboundHTLCErr_hash(oPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Checks if two InboundHTLCErrs contain equal inner contents.
+		/// This ignores pointers and is_owned flags and looks at the values in fields.
+		/// Two objects with NULL inner values will be considered "equal" here.
+		public class func eq(a: InboundHTLCErr, b: InboundHTLCErr) -> Bool {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: a.cType!) { (aPointer: UnsafePointer<LDKInboundHTLCErr>) in
+
+					withUnsafePointer(to: b.cType!) { (bPointer: UnsafePointer<LDKInboundHTLCErr>) in
+						InboundHTLCErr_eq(aPointer, bPointer)
+					}
+
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 
 		/// Indicates that this is the only struct which contains the same pointer.
 		/// Rust functions which take ownership of an object provided via an argument require
@@ -293,6 +366,19 @@ extension Bindings {
 			return returnValue
 		}
 
+
+		internal func danglingClone() -> InboundHTLCErr {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
+		}
+
+		internal func dynamicallyDangledClone() -> InboundHTLCErr {
+			let dangledClone = self.clone()
+			// if it's owned, i. e. controlled by Rust, it should dangle on our end
+			dangledClone.dangling = dangledClone.cType!.is_owned
+			return dangledClone
+		}
 
 		internal func setCFreeability(freeable: Bool) -> InboundHTLCErr {
 			self.cType!.is_owned = freeable

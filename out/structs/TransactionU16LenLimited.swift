@@ -206,6 +206,32 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Returns a reference to the contained `Transaction`
+		public func asTransaction() -> [UInt8] {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKTransactionU16LenLimited>) in
+					TransactionU16LenLimited_as_transaction(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Transaction(
+				cType: nativeCallResult, instantiationContext: "TransactionU16LenLimited.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
 		/// Serialize the TransactionU16LenLimited object into a byte array which can be read by TransactionU16LenLimited_read
 		public func write() -> [UInt8] {
 			// native call variable prep

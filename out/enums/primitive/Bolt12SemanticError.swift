@@ -83,6 +83,9 @@ extension Bindings {
 		/// Blinded paths were expected but were missing.
 		case MissingPaths
 
+		/// Blinded paths were provided but were not expected.
+		case UnexpectedPaths
+
 		/// The blinded payinfo given does not match the number of blinded path hops.
 		case InvalidPayInfo
 
@@ -167,6 +170,9 @@ extension Bindings {
 
 				case LDKBolt12SemanticError_MissingPaths:
 					self = .MissingPaths
+
+				case LDKBolt12SemanticError_UnexpectedPaths:
+					self = .UnexpectedPaths
 
 				case LDKBolt12SemanticError_InvalidPayInfo:
 					self = .InvalidPayInfo
@@ -258,6 +264,9 @@ extension Bindings {
 
 				case .MissingPaths:
 					return LDKBolt12SemanticError_MissingPaths
+
+				case .UnexpectedPaths:
+					return LDKBolt12SemanticError_UnexpectedPaths
 
 				case .InvalidPayInfo:
 					return LDKBolt12SemanticError_InvalidPayInfo

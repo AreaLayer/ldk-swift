@@ -101,9 +101,39 @@ extension Bindings {
 
 		}
 
+		/// Creates a new BigEndianScalar which has the same data as `orig`
+		internal func clone() -> BigEndianScalar {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKBigEndianScalar>) in
+					BigEndianScalar_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = BigEndianScalar(
+				cType: nativeCallResult, instantiationContext: "BigEndianScalar.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 
 		public func getValue() -> [UInt8] {
 			return Bindings.UInt8Tuple32ToArray(tuple: self.cType!.big_endian_bytes)
+		}
+
+
+		internal func danglingClone() -> BigEndianScalar {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
 		}
 
 
