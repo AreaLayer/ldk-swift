@@ -10,7 +10,7 @@ public typealias MaxDustHTLCExposure = Bindings.MaxDustHTLCExposure
 
 extension Bindings {
 
-	/// Options for how to set the max dust HTLC exposure allowed on a channel. See
+	/// Options for how to set the max dust exposure allowed on a channel. See
 	/// [`ChannelConfig::max_dust_htlc_exposure`] for details.
 	public class MaxDustHTLCExposure: NativeTypeWrapper {
 
@@ -73,19 +73,17 @@ extension Bindings {
 			/// exposure and the new minimum value for HTLCs to be economically viable to claim.
 			case FixedLimitMsat
 
-			/// This sets a multiplier on the estimated high priority feerate (sats/KW, as obtained from
-			/// [`FeeEstimator`]) to determine the maximum allowed dust exposure. If this variant is used
-			/// then the maximum dust exposure in millisatoshis is calculated as:
-			/// `high_priority_feerate_per_kw * value`. For example, with our default value
-			/// `FeeRateMultiplier(5000)`:
+			/// This sets a multiplier on the [`ConfirmationTarget::OnChainSweep`] feerate (in sats/KW) to
+			/// determine the maximum allowed dust exposure. If this variant is used then the maximum dust
+			/// exposure in millisatoshis is calculated as:
+			/// `feerate_per_kw * value`. For example, with our default value
+			/// `FeeRateMultiplier(10_000)`:
 			///
 			/// - For the minimum fee rate of 1 sat/vByte (250 sat/KW, although the minimum
 			/// defaults to 253 sats/KW for rounding, see [`FeeEstimator`]), the max dust exposure would
-			/// be 253 * 5000 = 1,265,000 msats.
+			/// be 253 * 10_000 = 2,530,000 msats.
 			/// - For a fee rate of 30 sat/vByte (7500 sat/KW), the max dust exposure would be
-			/// 7500 * 5000 = 37,500,000 msats.
-			///
-			/// This allows the maximum dust exposure to automatically scale with fee rate changes.
+			/// 7500 * 50_000 = 75,000,000 msats (0.00075 BTC).
 			///
 			/// Note, if you're using a third-party fee estimator, this may leave you more exposed to a
 			/// fee griefing attack, where your fee estimator may purposely overestimate the fee rate,
@@ -100,6 +98,7 @@ extension Bindings {
 			/// by default this will be set to a [`Self::FixedLimitMsat`] of 5,000,000 msat.
 			///
 			/// [`FeeEstimator`]: crate::chain::chaininterface::FeeEstimator
+			/// [`ConfirmationTarget::OnChainSweep`]: crate::chain::chaininterface::ConfirmationTarget::OnChainSweep
 			case FeeRateMultiplier
 
 		}

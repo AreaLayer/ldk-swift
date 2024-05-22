@@ -252,10 +252,10 @@ public class HumanObjectPeerTestInstance {
         }
 
         fileprivate class TestPersister: Persist {
-            override func persistNewChannel(channelId: Bindings.OutPoint, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
+            override func persistNewChannel(channelFundingOutpoint channelId: Bindings.OutPoint, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
                 .Completed
             }
-            override func updatePersistedChannel(channelId: Bindings.OutPoint, update: Bindings.ChannelMonitorUpdate, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
+            override func updatePersistedChannel(channelFundingOutpoint channelId: Bindings.OutPoint, update: Bindings.ChannelMonitorUpdate, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
                 .Completed
             }
         }
@@ -475,9 +475,9 @@ public class HumanObjectPeerTestInstance {
         let peerB = Peer(master: self, seed: 2)
         let peerC = Peer(master: self, seed: 3)
 
-        let originalPeersA = peerA.peerManager.getPeerNodeIds()
-        let originalPeersB = peerB.peerManager.getPeerNodeIds()
-        let originalPeersC = peerC.peerManager.getPeerNodeIds()
+        let originalPeersA = peerA.peerManager.listPeers()
+        let originalPeersB = peerB.peerManager.listPeers()
+        let originalPeersC = peerC.peerManager.listPeers()
         XCTAssertEqual(originalPeersA.count, 0)
         XCTAssertEqual(originalPeersB.count, 0)
         XCTAssertEqual(originalPeersC.count, 0)
@@ -487,8 +487,8 @@ public class HumanObjectPeerTestInstance {
 
             // sleep for one second
             try! await Task.sleep(nanoseconds: 1_000_000_000)
-            let connectedPeersA = peerA.peerManager.getPeerNodeIds()
-            let connectedPeersB = peerB.peerManager.getPeerNodeIds()
+            let connectedPeersA = peerA.peerManager.listPeers()
+            let connectedPeersB = peerB.peerManager.listPeers()
             XCTAssertEqual(connectedPeersA.count, 1)
             XCTAssertEqual(connectedPeersB.count, 1)
         }
@@ -498,8 +498,8 @@ public class HumanObjectPeerTestInstance {
 
             // sleep for one second
             try! await Task.sleep(nanoseconds: 1_000_000_000)
-            let connectedPeersA = peerA.peerManager.getPeerNodeIds()
-            let connectedPeersC = peerC.peerManager.getPeerNodeIds()
+            let connectedPeersA = peerA.peerManager.listPeers()
+            let connectedPeersC = peerC.peerManager.listPeers()
             XCTAssertEqual(connectedPeersA.count, 2)
             XCTAssertEqual(connectedPeersC.count, 1)
         }
@@ -523,7 +523,7 @@ public class HumanObjectPeerTestInstance {
             let config = UserConfig.initWithDefault()
             let theirNodeId = peerB.channelManager.getOurNodeId()
             let userChannelId: [UInt8] = [UInt8](repeating: 42, count: 16);
-            let channelOpenResult = peerA.channelManager.createChannel(theirNetworkKey: theirNodeId, channelValueSatoshis: fundingAmount, pushMsat: 1000, userChannelId: userChannelId, temporaryChannelId: nil, overrideConfig: config)
+            let channelOpenResult = peerA.channelManager.createChannel(theirNetworkKey: theirNodeId, channelValueSatoshis: fundingAmount, pushMsat: 1000, userChannelId: userChannelId, temporaryChannelId: ChannelId.initWithZero(), overrideConfig: config)
 
             XCTAssertTrue(channelOpenResult.isOk())
             let channels = peerA.channelManager.listChannels()
@@ -647,9 +647,9 @@ public class HumanObjectPeerTestInstance {
         XCTAssertEqual(channelAToB.getChannelValueSatoshis(), fundingAmount)
         let shortChannelId = channelAToB.getShortChannelId()!
 
-        let fundingTxId = fundingTransaction.calculateId()
-        XCTAssertEqual(usableChannelsA[0].getChannelId(), fundingTxId)
-        XCTAssertEqual(usableChannelsB[0].getChannelId(), fundingTxId)
+        let fundingChannelId = ChannelId.initWithV1FromFundingTxid(txid: fundingTransaction.calculateId(), outputIndex: 0)
+        XCTAssertEqual(usableChannelsA[0].getChannelId().write(), fundingChannelId.write())
+        XCTAssertEqual(usableChannelsB[0].getChannelId().write(), fundingChannelId.write())
 
         let originalChannelBalanceAToB = channelAToB.getBalanceMsat()
         let originalChannelBalanceBToA = channelBToA.getBalanceMsat()
@@ -673,8 +673,8 @@ public class HumanObjectPeerTestInstance {
 
         do {
             // connect the nodes
-            let originalPeersA = peer1.peerManager.getPeerNodeIds()
-            let originalPeersB = peer2.peerManager.getPeerNodeIds()
+            let originalPeersA = peer1.peerManager.listPeers()
+            let originalPeersB = peer2.peerManager.listPeers()
             XCTAssertEqual(originalPeersA.count, 0)
             XCTAssertEqual(originalPeersB.count, 0)
 
@@ -684,9 +684,9 @@ public class HumanObjectPeerTestInstance {
             // sleep for one second
             try! await Task.sleep(nanoseconds: 1_000_000_000)
 
-            let connectedPeersA = peer1.peerManager.getPeerNodeIds()
-            let connectedPeersB = peer2.peerManager.getPeerNodeIds()
-            let connectedPeersC = peer3.peerManager.getPeerNodeIds()
+            let connectedPeersA = peer1.peerManager.listPeers()
+            let connectedPeersB = peer2.peerManager.listPeers()
+            let connectedPeersC = peer3.peerManager.listPeers()
             XCTAssertEqual(connectedPeersA.count, 1)
             XCTAssertEqual(connectedPeersB.count, 2)
             XCTAssertEqual(connectedPeersC.count, 1)
@@ -788,10 +788,10 @@ public class HumanObjectPeerTestInstance {
                 let paymentHash = paymentClaimable.getPaymentHash()
                 print("received payment of \(paymentClaimable.getAmountMsat()) with hash \(paymentHash)")
                 let paymentPurpose = paymentClaimable.getPurpose()
-                guard case .InvoicePayment = paymentPurpose.getValueType() else {
+                guard case .Bolt11InvoicePayment = paymentPurpose.getValueType() else {
                     return XCTAssert(false, "Expected .InvoicePayment, got \(paymentPurpose.getValueType())")
                 }
-                let invoicePayment = paymentPurpose.getValueAsInvoicePayment()!
+                let invoicePayment = paymentPurpose.getValueAsBolt11InvoicePayment()!
                 let preimage = invoicePayment.getPaymentPreimage()!
                 let secret = invoicePayment.getPaymentSecret()
                 if self.configuration.shouldRecipientRejectPayment {
@@ -913,10 +913,10 @@ public class HumanObjectPeerTestInstance {
                 let paymentHash = paymentClaimable.getPaymentHash()
                 print("received payment of \(paymentClaimable.getAmountMsat()) with hash \(paymentHash)")
                 let paymentPurpose = paymentClaimable.getPurpose()
-                guard case .InvoicePayment = paymentPurpose.getValueType() else {
+                guard case .Bolt11InvoicePayment = paymentPurpose.getValueType() else {
                     return XCTAssert(false, "Expected .InvoicePayment, got \(paymentPurpose.getValueType())")
                 }
-                let invoicePayment = paymentPurpose.getValueAsInvoicePayment()!
+                let invoicePayment = paymentPurpose.getValueAsBolt11InvoicePayment()!
                 let preimage = invoicePayment.getPaymentPreimage()!
                 let secret = invoicePayment.getPaymentSecret()
                 peer1.channelManager.claimFunds(paymentPreimage: preimage)

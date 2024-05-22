@@ -2,15 +2,15 @@
 	import LDKHeaders
 #endif
 
-/// A dynamically-allocated array of crate::lightning::chain::transaction::OutPoints of arbitrary size.
+/// A dynamically-allocated array of crate::lightning::ln::peer_handler::PeerDetailss of arbitrary size.
 /// This corresponds to std::vector in C++
-internal typealias Vec_OutPointZ = Bindings.Vec_OutPointZ
+internal typealias Vec_PeerDetailsZ = Bindings.Vec_PeerDetailsZ
 
 extension Bindings {
 
-	/// A dynamically-allocated array of crate::lightning::chain::transaction::OutPoints of arbitrary size.
+	/// A dynamically-allocated array of crate::lightning::ln::peer_handler::PeerDetailss of arbitrary size.
 	/// This corresponds to std::vector in C++
-	internal class Vec_OutPointZ: NativeTypeWrapper {
+	internal class Vec_PeerDetailsZ: NativeTypeWrapper {
 
 
 		/// Set to false to suppress an individual type's deinit log statements.
@@ -25,9 +25,9 @@ extension Bindings {
 		private static var instanceCounter: UInt = 0
 		internal let instanceNumber: UInt
 
-		internal var cType: LDKCVec_OutPointZ?
+		internal var cType: LDKCVec_PeerDetailsZ?
 
-		internal init(cType: LDKCVec_OutPointZ, instantiationContext: String) {
+		internal init(cType: LDKCVec_PeerDetailsZ, instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -35,7 +35,7 @@ extension Bindings {
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 		}
 
-		internal init(cType: LDKCVec_OutPointZ, instantiationContext: String, anchor: NativeTypeWrapper) {
+		internal init(cType: LDKCVec_PeerDetailsZ, instantiationContext: String, anchor: NativeTypeWrapper) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -46,7 +46,7 @@ extension Bindings {
 		}
 
 		internal init(
-			cType: LDKCVec_OutPointZ, instantiationContext: String, anchor: NativeTypeWrapper, dangle: Bool = false
+			cType: LDKCVec_PeerDetailsZ, instantiationContext: String, anchor: NativeTypeWrapper, dangle: Bool = false
 		) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
@@ -58,28 +58,28 @@ extension Bindings {
 		}
 
 
-		internal init(array: [OutPoint], instantiationContext: String) {
+		internal init(array: [PeerDetails], instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 
 
-			let rustArray = array.map { (currentValueDepth1: OutPoint) -> LDKOutPoint in
+			let rustArray = array.map { (currentValueDepth1: PeerDetails) -> LDKPeerDetails in
 
-				return currentValueDepth1.dynamicallyDangledClone().cType!
+				return currentValueDepth1.dangle().cType!
 			}
 
 
-			let dataContainer = UnsafeMutablePointer<LDKOutPoint>.allocate(capacity: array.count)
+			let dataContainer = UnsafeMutablePointer<LDKPeerDetails>.allocate(capacity: array.count)
 			dataContainer.initialize(from: rustArray, count: array.count)
 
-			let vector = LDKCVec_OutPointZ(data: dataContainer, datalen: UInt(array.count))
+			let vector = LDKCVec_PeerDetailsZ(data: dataContainer, datalen: UInt(array.count))
 			self.cType = vector
 		}
 
-		public func getValue() -> [OutPoint] {
+		public func getValue() -> [PeerDetails] {
 
-			var array = [LDKOutPoint]()
+			var array = [LDKPeerDetails]()
 
 
 			for index1 in 0..<Int(self.cType!.datalen) {
@@ -88,9 +88,9 @@ extension Bindings {
 			}
 
 
-			let swiftArray = array.map { (currentCType: LDKOutPoint) -> OutPoint in
-				OutPoint(
-					cType: currentCType, instantiationContext: "Vec_OutPointZ.swift::\(#function):\(#line)",
+			let swiftArray = array.map { (currentCType: LDKPeerDetails) -> PeerDetails in
+				PeerDetails(
+					cType: currentCType, instantiationContext: "Vec_PeerDetailsZ.swift::\(#function):\(#line)",
 					anchor: self
 				)
 				.dangle()
@@ -105,7 +105,7 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = CVec_OutPointZ_free(self.cType!)
+			let nativeCallResult = CVec_PeerDetailsZ_free(self.cType!)
 
 			// cleanup
 
@@ -126,13 +126,13 @@ extension Bindings {
 			if !self.dangling {
 				if Self.enableDeinitLogging {
 					Bindings.print(
-						"Freeing Vec_OutPointZ \(self.instanceNumber). (Origin: \(self.instantiationContext))")
+						"Freeing Vec_PeerDetailsZ \(self.instanceNumber). (Origin: \(self.instantiationContext))")
 				}
 
 				self.free()
 			} else if Self.enableDeinitLogging {
 				Bindings.print(
-					"Not freeing Vec_OutPointZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
+					"Not freeing Vec_PeerDetailsZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
 				)
 			}
 		}

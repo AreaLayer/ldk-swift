@@ -176,8 +176,8 @@ extension Bindings {
 
 
 			func persistNewChannelLambda(
-				this_arg: UnsafeRawPointer?, channel_id: LDKOutPoint, data: UnsafePointer<LDKChannelMonitor>,
-				update_id: LDKMonitorUpdateId
+				this_arg: UnsafeRawPointer?, channel_funding_outpoint: LDKOutPoint,
+				data: UnsafePointer<LDKChannelMonitor>, update_id: LDKMonitorUpdateId
 			) -> LDKChannelMonitorUpdateStatus {
 				let instance: Persist = Bindings.pointerToInstance(
 					pointer: this_arg!, sourceMarker: "Persist::persistNewChannelLambda")
@@ -187,8 +187,9 @@ extension Bindings {
 
 				// Swift callback call
 				let swiftCallbackResult = instance.persistNewChannel(
-					channelId: OutPoint(
-						cType: channel_id, instantiationContext: "Persist.swift::init()::\(#function):\(#line)"),
+					channelFundingOutpoint: OutPoint(
+						cType: channel_funding_outpoint,
+						instantiationContext: "Persist.swift::init()::\(#function):\(#line)"),
 					data: ChannelMonitor(
 						cType: data.pointee, instantiationContext: "Persist.swift::init()::\(#function):\(#line)"
 					)
@@ -206,7 +207,7 @@ extension Bindings {
 			}
 
 			func updatePersistedChannelLambda(
-				this_arg: UnsafeRawPointer?, channel_id: LDKOutPoint, update: LDKChannelMonitorUpdate,
+				this_arg: UnsafeRawPointer?, channel_funding_outpoint: LDKOutPoint, update: LDKChannelMonitorUpdate,
 				data: UnsafePointer<LDKChannelMonitor>, update_id: LDKMonitorUpdateId
 			) -> LDKChannelMonitorUpdateStatus {
 				let instance: Persist = Bindings.pointerToInstance(
@@ -217,8 +218,9 @@ extension Bindings {
 
 				// Swift callback call
 				let swiftCallbackResult = instance.updatePersistedChannel(
-					channelId: OutPoint(
-						cType: channel_id, instantiationContext: "Persist.swift::init()::\(#function):\(#line)"),
+					channelFundingOutpoint: OutPoint(
+						cType: channel_funding_outpoint,
+						instantiationContext: "Persist.swift::init()::\(#function):\(#line)"),
 					update: ChannelMonitorUpdate(
 						cType: update, instantiationContext: "Persist.swift::init()::\(#function):\(#line)"),
 					data: ChannelMonitor(
@@ -233,6 +235,28 @@ extension Bindings {
 
 				// return value (do some wrapping)
 				let returnValue = swiftCallbackResult.getCValue()
+
+				return returnValue
+			}
+
+			func archivePersistedChannelLambda(this_arg: UnsafeRawPointer?, channel_funding_outpoint: LDKOutPoint) {
+				let instance: Persist = Bindings.pointerToInstance(
+					pointer: this_arg!, sourceMarker: "Persist::archivePersistedChannelLambda")
+
+				// Swift callback variable prep
+
+
+				// Swift callback call
+				let swiftCallbackResult = instance.archivePersistedChannel(
+					channelFundingOutpoint: OutPoint(
+						cType: channel_funding_outpoint,
+						instantiationContext: "Persist.swift::init()::\(#function):\(#line)"))
+
+				// cleanup
+
+
+				// return value (do some wrapping)
+				let returnValue = swiftCallbackResult
 
 				return returnValue
 			}
@@ -261,6 +285,7 @@ extension Bindings {
 				this_arg: thisArg,
 				persist_new_channel: persistNewChannelLambda,
 				update_persisted_channel: updatePersistedChannelLambda,
+				archive_persisted_channel: archivePersistedChannelLambda,
 				free: freeLambda
 			)
 		}
@@ -281,7 +306,7 @@ extension Bindings {
 		///
 		/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
 		/// [`Writeable::write`]: crate::util::ser::Writeable::write
-		open func persistNewChannel(channelId: OutPoint, data: ChannelMonitor, updateId: MonitorUpdateId)
+		open func persistNewChannel(channelFundingOutpoint: OutPoint, data: ChannelMonitor, updateId: MonitorUpdateId)
 			-> ChannelMonitorUpdateStatus
 		{
 
@@ -327,11 +352,24 @@ extension Bindings {
 		///
 		/// Note that update (or a relevant inner pointer) may be NULL or all-0s to represent None
 		open func updatePersistedChannel(
-			channelId: OutPoint, update: ChannelMonitorUpdate, data: ChannelMonitor, updateId: MonitorUpdateId
+			channelFundingOutpoint: OutPoint, update: ChannelMonitorUpdate, data: ChannelMonitor,
+			updateId: MonitorUpdateId
 		) -> ChannelMonitorUpdateStatus {
 
 			Bindings.print(
 				"Error: Persist::updatePersistedChannel MUST be overridden! Offending class: \(String(describing: self)). Aborting.",
+				severity: .ERROR)
+			abort()
+		}
+
+		/// Prevents the channel monitor from being loaded on startup.
+		///
+		/// Archiving the data in a backup location (rather than deleting it fully) is useful for
+		/// hedging against data loss in case of unexpected failure.
+		open func archivePersistedChannel(channelFundingOutpoint: OutPoint) {
+
+			Bindings.print(
+				"Error: Persist::archivePersistedChannel MUST be overridden! Offending class: \(String(describing: self)). Aborting.",
 				severity: .ERROR)
 			abort()
 		}
@@ -384,9 +422,9 @@ extension Bindings {
 		///
 		/// [`ChannelManager`]: crate::ln::channelmanager::ChannelManager
 		/// [`Writeable::write`]: crate::util::ser::Writeable::write
-		public override func persistNewChannel(channelId: OutPoint, data: ChannelMonitor, updateId: MonitorUpdateId)
-			-> ChannelMonitorUpdateStatus
-		{
+		public override func persistNewChannel(
+			channelFundingOutpoint: OutPoint, data: ChannelMonitor, updateId: MonitorUpdateId
+		) -> ChannelMonitorUpdateStatus {
 			// native call variable prep
 
 
@@ -395,7 +433,7 @@ extension Bindings {
 				withUnsafePointer(to: data.cType!) { (dataPointer: UnsafePointer<LDKChannelMonitor>) in
 					self.cType!
 						.persist_new_channel(
-							self.cType!.this_arg, channelId.dynamicallyDangledClone().cType!, dataPointer,
+							self.cType!.this_arg, channelFundingOutpoint.dynamicallyDangledClone().cType!, dataPointer,
 							updateId.dynamicallyDangledClone().cType!)
 				}
 
@@ -445,7 +483,8 @@ extension Bindings {
 		///
 		/// Note that update (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public override func updatePersistedChannel(
-			channelId: OutPoint, update: ChannelMonitorUpdate, data: ChannelMonitor, updateId: MonitorUpdateId
+			channelFundingOutpoint: OutPoint, update: ChannelMonitorUpdate, data: ChannelMonitor,
+			updateId: MonitorUpdateId
 		) -> ChannelMonitorUpdateStatus {
 			// native call variable prep
 
@@ -455,7 +494,7 @@ extension Bindings {
 				withUnsafePointer(to: data.cType!) { (dataPointer: UnsafePointer<LDKChannelMonitor>) in
 					self.cType!
 						.update_persisted_channel(
-							self.cType!.this_arg, channelId.dynamicallyDangledClone().cType!,
+							self.cType!.this_arg, channelFundingOutpoint.dynamicallyDangledClone().cType!,
 							update.dynamicallyDangledClone().cType!, dataPointer,
 							updateId.dynamicallyDangledClone().cType!)
 				}
@@ -466,6 +505,28 @@ extension Bindings {
 
 			// return value (do some wrapping)
 			let returnValue = ChannelMonitorUpdateStatus(value: nativeCallResult)
+
+			return returnValue
+		}
+
+		/// Prevents the channel monitor from being loaded on startup.
+		///
+		/// Archiving the data in a backup location (rather than deleting it fully) is useful for
+		/// hedging against data loss in case of unexpected failure.
+		public override func archivePersistedChannel(channelFundingOutpoint: OutPoint) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = self.cType!
+				.archive_persisted_channel(
+					self.cType!.this_arg, channelFundingOutpoint.dynamicallyDangledClone().cType!)
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
 
 			return returnValue
 		}

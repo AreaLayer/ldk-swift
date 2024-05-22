@@ -25,7 +25,7 @@
 /// # use bitcoin::hashes::_export::_core::time::Duration;
 /// # use bitcoin::hashes::hex::FromHex;
 /// # use bitcoin::secp256k1::{PublicKey, Secp256k1, SecretKey, self};
-/// # use lightning::blinded_path::BlindedPath;
+/// # use lightning::blinded_path::{BlindedPath, EmptyNodeIdLookUp};
 /// # use lightning::sign::{EntropySource, KeysManager};
 /// # use lightning::ln::peer_handler::IgnoringMessageHandler;
 /// # use lightning::onion_message::messenger::{Destination, MessageRouter, OnionMessagePath, OnionMessenger};
@@ -66,14 +66,15 @@
 /// # let hop_node_id1 = PublicKey::from_secret_key(&secp_ctx, &node_secret);
 /// # let (hop_node_id3, hop_node_id4) = (hop_node_id1, hop_node_id1);
 /// # let destination_node_id = hop_node_id1;
+/// # let node_id_lookup = EmptyNodeIdLookUp {};
 /// # let message_router = Arc::new(FakeMessageRouter {});
 /// # let custom_message_handler = IgnoringMessageHandler {};
 /// # let offers_message_handler = IgnoringMessageHandler {};
 /// // Create the onion messenger. This must use the same `keys_manager` as is passed to your
 /// // ChannelManager.
 /// let onion_messenger = OnionMessenger::new(
-/// &keys_manager, &keys_manager, logger, message_router, &offers_message_handler,
-/// &custom_message_handler
+/// &keys_manager, &keys_manager, logger, &node_id_lookup, message_router,
+/// &offers_message_handler, &custom_message_handler
 /// );
 ///
 /// # #[derive(Debug, Clone)]
@@ -138,7 +139,7 @@ extension Bindings {
 	/// # use bitcoin::hashes::_export::_core::time::Duration;
 	/// # use bitcoin::hashes::hex::FromHex;
 	/// # use bitcoin::secp256k1::{PublicKey, Secp256k1, SecretKey, self};
-	/// # use lightning::blinded_path::BlindedPath;
+	/// # use lightning::blinded_path::{BlindedPath, EmptyNodeIdLookUp};
 	/// # use lightning::sign::{EntropySource, KeysManager};
 	/// # use lightning::ln::peer_handler::IgnoringMessageHandler;
 	/// # use lightning::onion_message::messenger::{Destination, MessageRouter, OnionMessagePath, OnionMessenger};
@@ -179,14 +180,15 @@ extension Bindings {
 	/// # let hop_node_id1 = PublicKey::from_secret_key(&secp_ctx, &node_secret);
 	/// # let (hop_node_id3, hop_node_id4) = (hop_node_id1, hop_node_id1);
 	/// # let destination_node_id = hop_node_id1;
+	/// # let node_id_lookup = EmptyNodeIdLookUp {};
 	/// # let message_router = Arc::new(FakeMessageRouter {});
 	/// # let custom_message_handler = IgnoringMessageHandler {};
 	/// # let offers_message_handler = IgnoringMessageHandler {};
 	/// // Create the onion messenger. This must use the same `keys_manager` as is passed to your
 	/// // ChannelManager.
 	/// let onion_messenger = OnionMessenger::new(
-	/// &keys_manager, &keys_manager, logger, message_router, &offers_message_handler,
-	/// &custom_message_handler
+	/// &keys_manager, &keys_manager, logger, &node_id_lookup, message_router,
+	/// &offers_message_handler, &custom_message_handler
 	/// );
 	///
 	/// # #[derive(Debug, Clone)]
@@ -294,8 +296,8 @@ extension Bindings {
 		/// Constructs a new `OnionMessenger` to send, forward, and delegate received onion messages to
 		/// their respective handlers.
 		public init(
-			entropySource: EntropySource, nodeSigner: NodeSigner, logger: Logger, messageRouter: MessageRouter,
-			offersHandler: OffersMessageHandler, customHandler: CustomOnionMessageHandler
+			entropySource: EntropySource, nodeSigner: NodeSigner, logger: Logger, nodeIdLookup: NodeIdLookUp,
+			messageRouter: MessageRouter, offersHandler: OffersMessageHandler, customHandler: CustomOnionMessageHandler
 		) {
 			// native call variable prep
 
@@ -303,7 +305,8 @@ extension Bindings {
 			// native method call
 			let nativeCallResult = OnionMessenger_new(
 				entropySource.activate().cType!, nodeSigner.activate().cType!, logger.activate().cType!,
-				messageRouter.activate().cType!, offersHandler.activate().cType!, customHandler.activate().cType!)
+				nodeIdLookup.activate().cType!, messageRouter.activate().cType!, offersHandler.activate().cType!,
+				customHandler.activate().cType!)
 
 			// cleanup
 

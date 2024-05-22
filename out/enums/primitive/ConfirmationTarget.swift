@@ -97,6 +97,18 @@ extension Bindings {
 		/// [`ChannelManager::close_channel_with_feerate_and_script`]: crate::ln::channelmanager::ChannelManager::close_channel_with_feerate_and_script
 		case ChannelCloseMinimum
 
+		/// The feerate [`OutputSweeper`] will use on transactions spending
+		/// [`SpendableOutputDescriptor`]s after a channel closure.
+		///
+		/// Generally spending these outputs is safe as long as they eventually confirm, so a value
+		/// (slightly above) the mempool minimum should suffice. However, as this value will influence
+		/// how long funds will be unavailable after channel closure, [`FeeEstimator`] implementors
+		/// might want to choose a higher feerate to regain control over funds faster.
+		///
+		/// [`OutputSweeper`]: crate::util::sweep::OutputSweeper
+		/// [`SpendableOutputDescriptor`]: crate::sign::SpendableOutputDescriptor
+		case OutputSpendingFee
+
 
 		internal init(value: LDKConfirmationTarget) {
 			switch value {
@@ -118,6 +130,9 @@ extension Bindings {
 
 				case LDKConfirmationTarget_ChannelCloseMinimum:
 					self = .ChannelCloseMinimum
+
+				case LDKConfirmationTarget_OutputSpendingFee:
+					self = .OutputSpendingFee
 
 				default:
 					Bindings.print("Error: Invalid value type for ConfirmationTarget! Aborting.", severity: .ERROR)
@@ -146,6 +161,9 @@ extension Bindings {
 
 				case .ChannelCloseMinimum:
 					return LDKConfirmationTarget_ChannelCloseMinimum
+
+				case .OutputSpendingFee:
+					return LDKConfirmationTarget_OutputSpendingFee
 
 			}
 		}

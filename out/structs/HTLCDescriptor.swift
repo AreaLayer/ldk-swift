@@ -127,6 +127,61 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// The txid of the commitment transaction in which the HTLC output lives.
+		public func getCommitmentTxid() -> [UInt8]? {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKHTLCDescriptor>) in
+					HTLCDescriptor_get_commitment_txid(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+			guard let nativeCallResult = nativeCallResult else {
+				return nil
+			}
+
+
+			// return value (do some wrapping)
+			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+
+
+			return returnValue
+		}
+
+		/// The txid of the commitment transaction in which the HTLC output lives.
+		public func setCommitmentTxid(val: [UInt8]) {
+			// native call variable prep
+
+			let valPrimitiveWrapper = ThirtyTwoBytes(
+				value: val, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) {
+					(thisPtrPointer: UnsafeMutablePointer<LDKHTLCDescriptor>) in
+					HTLCDescriptor_set_commitment_txid(thisPtrPointer, valPrimitiveWrapper.cType!)
+				}
+
+
+			// cleanup
+
+			// for elided types, we need this
+			valPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// The number of the commitment transaction in which the HTLC output lives.
 		public func getPerCommitmentNumber() -> UInt64 {
 			// native call variable prep
@@ -442,6 +497,68 @@ extension Bindings {
 
 
 			return returnValue
+		}
+
+		/// Constructs a new HTLCDescriptor given each field
+		public init(
+			channelDerivationParametersArg: ChannelDerivationParameters, commitmentTxidArg: [UInt8],
+			perCommitmentNumberArg: UInt64, perCommitmentPointArg: [UInt8], feeratePerKwArg: UInt32,
+			htlcArg: HTLCOutputInCommitment, preimageArg: [UInt8]?, counterpartySigArg: [UInt8]
+		) {
+			// native call variable prep
+
+			let commitmentTxidArgPrimitiveWrapper = ThirtyTwoBytes(
+				value: commitmentTxidArg, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)")
+
+			let perCommitmentPointArgPrimitiveWrapper = PublicKey(
+				value: perCommitmentPointArg, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)")
+
+			let preimageArgOption = Option_ThirtyTwoBytesZ(
+				some: preimageArg, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)"
+			)
+			.danglingClone()
+
+			let counterpartySigArgPrimitiveWrapper = ECDSASignature(
+				value: counterpartySigArg, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult = HTLCDescriptor_new(
+				channelDerivationParametersArg.dynamicallyDangledClone().cType!,
+				commitmentTxidArgPrimitiveWrapper.cType!, perCommitmentNumberArg,
+				perCommitmentPointArgPrimitiveWrapper.cType!, feeratePerKwArg, htlcArg.dynamicallyDangledClone().cType!,
+				preimageArgOption.cType!, counterpartySigArgPrimitiveWrapper.cType!)
+
+			// cleanup
+
+			// for elided types, we need this
+			commitmentTxidArgPrimitiveWrapper.noOpRetain()
+
+			// for elided types, we need this
+			perCommitmentPointArgPrimitiveWrapper.noOpRetain()
+
+			// for elided types, we need this
+			counterpartySigArgPrimitiveWrapper.noOpRetain()
+
+			self.initialCFreeability = nativeCallResult.is_owned
+
+
+			/*
+						// return value (do some wrapping)
+						let returnValue = HTLCDescriptor(cType: nativeCallResult, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)")
+						*/
+
+
+			self.cType = nativeCallResult
+
+			Self.instanceCounter += 1
+			self.instanceNumber = Self.instanceCounter
+			super
+				.init(
+					conflictAvoidingVariableName: 0, instantiationContext: "HTLCDescriptor.swift::\(#function):\(#line)"
+				)
+
+
 		}
 
 		/// Creates a copy of the HTLCDescriptor

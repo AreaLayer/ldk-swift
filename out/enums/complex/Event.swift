@@ -219,9 +219,15 @@ extension Bindings {
 
 			/// Used to indicate that an output which you should know how to spend was confirmed on chain
 			/// and is now spendable.
-			/// Such an output will *not* ever be spent by rust-lightning, and are not at risk of your
+			///
+			/// Such an output will *never* be spent directly by LDK, and are not at risk of your
 			/// counterparty spending them due to some kind of timeout. Thus, you need to store them
 			/// somewhere and spend them when you create on-chain transactions.
+			///
+			/// You may hand them to the [`OutputSweeper`] utility which will store and (re-)generate spending
+			/// transactions for you.
+			///
+			/// [`OutputSweeper`]: crate::util::sweep::OutputSweeper
 			case SpendableOutputs
 
 			/// This event is generated when a payment has been successfully forwarded through us and a
@@ -242,8 +248,8 @@ extension Bindings {
 			/// establishment.
 			case ChannelReady
 
-			/// Used to indicate that a previously opened channel with the given `channel_id` is in the
-			/// process of closure.
+			/// Used to indicate that a channel that got past the initial handshake with the given `channel_id` is in the
+			/// process of closure. This includes previously opened channels, and channels that time out from not being funded.
 			///
 			/// Note that this event is only triggered for accepted channels: if the
 			/// [`UserConfig::manually_accept_inbound_channels`] config flag is set to true and the channel is
@@ -417,13 +423,10 @@ extension Bindings {
 
 		/// Utility method to constructs a new FundingGenerationReady-variant Event
 		public class func initWithFundingGenerationReady(
-			temporaryChannelId: [UInt8], counterpartyNodeId: [UInt8], channelValueSatoshis: UInt64,
+			temporaryChannelId: Bindings.ChannelId, counterpartyNodeId: [UInt8], channelValueSatoshis: UInt64,
 			outputScript: [UInt8], userChannelId: [UInt8]
 		) -> Event {
 			// native call variable prep
-
-			let temporaryChannelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: temporaryChannelId, instantiationContext: "Event.swift::\(#function):\(#line)")
 
 			let counterpartyNodeIdPrimitiveWrapper = PublicKey(
 				value: counterpartyNodeId, instantiationContext: "Event.swift::\(#function):\(#line)")
@@ -439,13 +442,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_funding_generation_ready(
-				temporaryChannelIdPrimitiveWrapper.cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
+				temporaryChannelId.dynamicallyDangledClone().cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
 				channelValueSatoshis, outputScriptVector.cType!, userChannelIdPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			temporaryChannelIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			counterpartyNodeIdPrimitiveWrapper.noOpRetain()
@@ -466,8 +466,8 @@ extension Bindings {
 		/// Utility method to constructs a new PaymentClaimable-variant Event
 		public class func initWithPaymentClaimable(
 			receiverNodeId: [UInt8], paymentHash: [UInt8], onionFields: Bindings.RecipientOnionFields,
-			amountMsat: UInt64, counterpartySkimmedFeeMsat: UInt64, purpose: PaymentPurpose, viaChannelId: [UInt8]?,
-			viaUserChannelId: [UInt8]?, claimDeadline: UInt32?
+			amountMsat: UInt64, counterpartySkimmedFeeMsat: UInt64, purpose: PaymentPurpose,
+			viaChannelId: Bindings.ChannelId, viaUserChannelId: [UInt8]?, claimDeadline: UInt32?
 		) -> Event {
 			// native call variable prep
 
@@ -476,11 +476,6 @@ extension Bindings {
 
 			let paymentHashPrimitiveWrapper = ThirtyTwoBytes(
 				value: paymentHash, instantiationContext: "Event.swift::\(#function):\(#line)")
-
-			let viaChannelIdOption = Option_ThirtyTwoBytesZ(
-				some: viaChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
 
 			let viaUserChannelIdOption = Option_U128Z(
 				some: viaUserChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
@@ -497,8 +492,8 @@ extension Bindings {
 			let nativeCallResult = Event_payment_claimable(
 				receiverNodeIdPrimitiveWrapper.cType!, paymentHashPrimitiveWrapper.cType!,
 				onionFields.dynamicallyDangledClone().cType!, amountMsat, counterpartySkimmedFeeMsat,
-				purpose.danglingClone().cType!, viaChannelIdOption.cType!, viaUserChannelIdOption.cType!,
-				claimDeadlineOption.cType!)
+				purpose.danglingClone().cType!, viaChannelId.dynamicallyDangledClone().cType!,
+				viaUserChannelIdOption.cType!, claimDeadlineOption.cType!)
 
 			// cleanup
 
@@ -896,7 +891,9 @@ extension Bindings {
 		}
 
 		/// Utility method to constructs a new SpendableOutputs-variant Event
-		public class func initWithSpendableOutputs(outputs: [SpendableOutputDescriptor], channelId: [UInt8]?) -> Event {
+		public class func initWithSpendableOutputs(outputs: [SpendableOutputDescriptor], channelId: Bindings.ChannelId)
+			-> Event
+		{
 			// native call variable prep
 
 			let outputsVector = Vec_SpendableOutputDescriptorZ(
@@ -904,14 +901,10 @@ extension Bindings {
 			)
 			.dangle()
 
-			let channelIdOption = Option_ThirtyTwoBytesZ(
-				some: channelId, instantiationContext: "Event.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
 
 			// native method call
-			let nativeCallResult = Event_spendable_outputs(outputsVector.cType!, channelIdOption.cType!)
+			let nativeCallResult = Event_spendable_outputs(
+				outputsVector.cType!, channelId.dynamicallyDangledClone().cType!)
 
 			// cleanup
 
@@ -927,23 +920,29 @@ extension Bindings {
 
 		/// Utility method to constructs a new PaymentForwarded-variant Event
 		public class func initWithPaymentForwarded(
-			prevChannelId: [UInt8]?, nextChannelId: [UInt8]?, feeEarnedMsat: UInt64?, claimFromOnchainTx: Bool,
+			prevChannelId: Bindings.ChannelId, nextChannelId: Bindings.ChannelId, prevUserChannelId: [UInt8]?,
+			nextUserChannelId: [UInt8]?, totalFeeEarnedMsat: UInt64?, skimmedFeeMsat: UInt64?, claimFromOnchainTx: Bool,
 			outboundAmountForwardedMsat: UInt64?
 		) -> Event {
 			// native call variable prep
 
-			let prevChannelIdOption = Option_ThirtyTwoBytesZ(
-				some: prevChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
+			let prevUserChannelIdOption = Option_U128Z(
+				some: prevUserChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
 			)
 			.danglingClone()
 
-			let nextChannelIdOption = Option_ThirtyTwoBytesZ(
-				some: nextChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
+			let nextUserChannelIdOption = Option_U128Z(
+				some: nextUserChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
 			)
 			.danglingClone()
 
-			let feeEarnedMsatOption = Option_u64Z(
-				some: feeEarnedMsat, instantiationContext: "Event.swift::\(#function):\(#line)"
+			let totalFeeEarnedMsatOption = Option_u64Z(
+				some: totalFeeEarnedMsat, instantiationContext: "Event.swift::\(#function):\(#line)"
+			)
+			.danglingClone()
+
+			let skimmedFeeMsatOption = Option_u64Z(
+				some: skimmedFeeMsat, instantiationContext: "Event.swift::\(#function):\(#line)"
 			)
 			.danglingClone()
 
@@ -955,8 +954,9 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_payment_forwarded(
-				prevChannelIdOption.cType!, nextChannelIdOption.cType!, feeEarnedMsatOption.cType!, claimFromOnchainTx,
-				outboundAmountForwardedMsatOption.cType!)
+				prevChannelId.dynamicallyDangledClone().cType!, nextChannelId.dynamicallyDangledClone().cType!,
+				prevUserChannelIdOption.cType!, nextUserChannelIdOption.cType!, totalFeeEarnedMsatOption.cType!,
+				skimmedFeeMsatOption.cType!, claimFromOnchainTx, outboundAmountForwardedMsatOption.cType!)
 
 			// cleanup
 
@@ -970,21 +970,13 @@ extension Bindings {
 
 		/// Utility method to constructs a new ChannelPending-variant Event
 		public class func initWithChannelPending(
-			channelId: [UInt8], userChannelId: [UInt8], formerTemporaryChannelId: [UInt8]?, counterpartyNodeId: [UInt8],
-			fundingTxo: Bindings.OutPoint
+			channelId: Bindings.ChannelId, userChannelId: [UInt8], formerTemporaryChannelId: Bindings.ChannelId,
+			counterpartyNodeId: [UInt8], fundingTxo: Bindings.OutPoint, channelType: Bindings.ChannelTypeFeatures
 		) -> Event {
 			// native call variable prep
 
-			let channelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelId, instantiationContext: "Event.swift::\(#function):\(#line)")
-
 			let userChannelIdPrimitiveWrapper = U128(
 				value: userChannelId, instantiationContext: "Event.swift::\(#function):\(#line)")
-
-			let formerTemporaryChannelIdOption = Option_ThirtyTwoBytesZ(
-				some: formerTemporaryChannelId, instantiationContext: "Event.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
 
 			let counterpartyNodeIdPrimitiveWrapper = PublicKey(
 				value: counterpartyNodeId, instantiationContext: "Event.swift::\(#function):\(#line)")
@@ -992,14 +984,11 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_channel_pending(
-				channelIdPrimitiveWrapper.cType!, userChannelIdPrimitiveWrapper.cType!,
-				formerTemporaryChannelIdOption.cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
-				fundingTxo.dynamicallyDangledClone().cType!)
+				channelId.dynamicallyDangledClone().cType!, userChannelIdPrimitiveWrapper.cType!,
+				formerTemporaryChannelId.dynamicallyDangledClone().cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
+				fundingTxo.dynamicallyDangledClone().cType!, channelType.dynamicallyDangledClone().cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			userChannelIdPrimitiveWrapper.noOpRetain()
@@ -1017,13 +1006,10 @@ extension Bindings {
 
 		/// Utility method to constructs a new ChannelReady-variant Event
 		public class func initWithChannelReady(
-			channelId: [UInt8], userChannelId: [UInt8], counterpartyNodeId: [UInt8],
+			channelId: Bindings.ChannelId, userChannelId: [UInt8], counterpartyNodeId: [UInt8],
 			channelType: Bindings.ChannelTypeFeatures
 		) -> Event {
 			// native call variable prep
-
-			let channelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelId, instantiationContext: "Event.swift::\(#function):\(#line)")
 
 			let userChannelIdPrimitiveWrapper = U128(
 				value: userChannelId, instantiationContext: "Event.swift::\(#function):\(#line)")
@@ -1034,13 +1020,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_channel_ready(
-				channelIdPrimitiveWrapper.cType!, userChannelIdPrimitiveWrapper.cType!,
+				channelId.dynamicallyDangledClone().cType!, userChannelIdPrimitiveWrapper.cType!,
 				counterpartyNodeIdPrimitiveWrapper.cType!, channelType.dynamicallyDangledClone().cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			userChannelIdPrimitiveWrapper.noOpRetain()
@@ -1058,13 +1041,10 @@ extension Bindings {
 
 		/// Utility method to constructs a new ChannelClosed-variant Event
 		public class func initWithChannelClosed(
-			channelId: [UInt8], userChannelId: [UInt8], reason: ClosureReason, counterpartyNodeId: [UInt8],
+			channelId: Bindings.ChannelId, userChannelId: [UInt8], reason: ClosureReason, counterpartyNodeId: [UInt8],
 			channelCapacitySats: UInt64?, channelFundingTxo: Bindings.OutPoint
 		) -> Event {
 			// native call variable prep
-
-			let channelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelId, instantiationContext: "Event.swift::\(#function):\(#line)")
 
 			let userChannelIdPrimitiveWrapper = U128(
 				value: userChannelId, instantiationContext: "Event.swift::\(#function):\(#line)")
@@ -1080,14 +1060,11 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_channel_closed(
-				channelIdPrimitiveWrapper.cType!, userChannelIdPrimitiveWrapper.cType!, reason.danglingClone().cType!,
-				counterpartyNodeIdPrimitiveWrapper.cType!, channelCapacitySatsOption.cType!,
-				channelFundingTxo.dynamicallyDangledClone().cType!)
+				channelId.dynamicallyDangledClone().cType!, userChannelIdPrimitiveWrapper.cType!,
+				reason.danglingClone().cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
+				channelCapacitySatsOption.cType!, channelFundingTxo.dynamicallyDangledClone().cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			userChannelIdPrimitiveWrapper.noOpRetain()
@@ -1104,11 +1081,8 @@ extension Bindings {
 		}
 
 		/// Utility method to constructs a new DiscardFunding-variant Event
-		public class func initWithDiscardFunding(channelId: [UInt8], transaction: [UInt8]) -> Event {
+		public class func initWithDiscardFunding(channelId: Bindings.ChannelId, transaction: [UInt8]) -> Event {
 			// native call variable prep
-
-			let channelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelId, instantiationContext: "Event.swift::\(#function):\(#line)")
 
 			let transactionPrimitiveWrapper = Transaction(
 				value: transaction, instantiationContext: "Event.swift::\(#function):\(#line)"
@@ -1118,12 +1092,9 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_discard_funding(
-				channelIdPrimitiveWrapper.cType!, transactionPrimitiveWrapper.cType!)
+				channelId.dynamicallyDangledClone().cType!, transactionPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			transactionPrimitiveWrapper.noOpRetain()
@@ -1138,13 +1109,10 @@ extension Bindings {
 
 		/// Utility method to constructs a new OpenChannelRequest-variant Event
 		public class func initWithOpenChannelRequest(
-			temporaryChannelId: [UInt8], counterpartyNodeId: [UInt8], fundingSatoshis: UInt64, pushMsat: UInt64,
-			channelType: Bindings.ChannelTypeFeatures
+			temporaryChannelId: Bindings.ChannelId, counterpartyNodeId: [UInt8], fundingSatoshis: UInt64,
+			pushMsat: UInt64, channelType: Bindings.ChannelTypeFeatures
 		) -> Event {
 			// native call variable prep
-
-			let temporaryChannelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: temporaryChannelId, instantiationContext: "Event.swift::\(#function):\(#line)")
 
 			let counterpartyNodeIdPrimitiveWrapper = PublicKey(
 				value: counterpartyNodeId, instantiationContext: "Event.swift::\(#function):\(#line)")
@@ -1152,13 +1120,10 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Event_open_channel_request(
-				temporaryChannelIdPrimitiveWrapper.cType!, counterpartyNodeIdPrimitiveWrapper.cType!, fundingSatoshis,
-				pushMsat, channelType.dynamicallyDangledClone().cType!)
+				temporaryChannelId.dynamicallyDangledClone().cType!, counterpartyNodeIdPrimitiveWrapper.cType!,
+				fundingSatoshis, pushMsat, channelType.dynamicallyDangledClone().cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			temporaryChannelIdPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			counterpartyNodeIdPrimitiveWrapper.noOpRetain()
@@ -1172,23 +1137,17 @@ extension Bindings {
 		}
 
 		/// Utility method to constructs a new HTLCHandlingFailed-variant Event
-		public class func initWithHtlchandlingFailed(prevChannelId: [UInt8], failedNextDestination: HTLCDestination)
-			-> Event
-		{
+		public class func initWithHtlchandlingFailed(
+			prevChannelId: Bindings.ChannelId, failedNextDestination: HTLCDestination
+		) -> Event {
 			// native call variable prep
-
-			let prevChannelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: prevChannelId, instantiationContext: "Event.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult = Event_htlchandling_failed(
-				prevChannelIdPrimitiveWrapper.cType!, failedNextDestination.danglingClone().cType!)
+				prevChannelId.dynamicallyDangledClone().cType!, failedNextDestination.danglingClone().cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			prevChannelIdPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -1598,13 +1557,11 @@ extension Bindings {
 			/// [`ChannelManager::funding_transaction_generated`].
 			///
 			/// [`ChannelManager::funding_transaction_generated`]: crate::ln::channelmanager::ChannelManager::funding_transaction_generated
-			public func getTemporaryChannelId() -> [UInt8] {
+			public func getTemporaryChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.temporary_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -1814,13 +1771,13 @@ extension Bindings {
 			}
 
 			/// The `channel_id` indicating over which channel we received the payment.
-			public func getViaChannelId() -> [UInt8]? {
+			///
+			/// Note that this (or a relevant inner pointer) may be NULL or all-0s to represent None
+			public func getViaChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = Option_ThirtyTwoBytesZ(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.via_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3082,13 +3039,13 @@ extension Bindings {
 			/// The `channel_id` indicating which channel the spendable outputs belong to.
 			///
 			/// This will always be `Some` for events generated by LDK versions 0.0.117 and above.
-			public func getChannelId() -> [UInt8]? {
+			///
+			/// Note that this (or a relevant inner pointer) may be NULL or all-0s to represent None
+			public func getChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = Option_ThirtyTwoBytesZ(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3153,25 +3110,41 @@ extension Bindings {
 			}
 
 
-			/// The incoming channel between the previous node and us. This is only `None` for events
-			/// generated or serialized by versions prior to 0.0.107.
-			public func getPrevChannelId() -> [UInt8]? {
+			/// The channel id of the incoming channel between the previous node and us.
+			///
+			/// This is only `None` for events generated or serialized by versions prior to 0.0.107.
+			///
+			/// Note that this (or a relevant inner pointer) may be NULL or all-0s to represent None
+			public func getPrevChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = Option_ThirtyTwoBytesZ(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.prev_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
 
-			/// The outgoing channel between the next node and us. This is only `None` for events
-			/// generated or serialized by versions prior to 0.0.107.
-			public func getNextChannelId() -> [UInt8]? {
+			/// The channel id of the outgoing channel between the next node and us.
+			///
+			/// This is only `None` for events generated or serialized by versions prior to 0.0.107.
+			///
+			/// Note that this (or a relevant inner pointer) may be NULL or all-0s to represent None
+			public func getNextChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = Option_ThirtyTwoBytesZ(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.next_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
+					anchor: self)
+
+				return returnValue
+			}
+
+			/// The `user_channel_id` of the incoming channel between the previous node and us.
+			///
+			/// This is only `None` for events generated or serialized by versions prior to 0.0.122.
+			public func getPrevUserChannelId() -> [UInt8]? {
+				// return value (do some wrapping)
+				let returnValue = Option_U128Z(
+					cType: self.cType!.prev_user_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
 					anchor: self
 				)
 				.getValue()
@@ -3179,7 +3152,23 @@ extension Bindings {
 				return returnValue
 			}
 
-			/// The fee, in milli-satoshis, which was earned as a result of the payment.
+			/// The `user_channel_id` of the outgoing channel between the next node and us.
+			///
+			/// This will be `None` if the payment was settled via an on-chain transaction. See the
+			/// caveat described for the `total_fee_earned_msat` field. Moreover it will be `None` for
+			/// events generated or serialized by versions prior to 0.0.122.
+			public func getNextUserChannelId() -> [UInt8]? {
+				// return value (do some wrapping)
+				let returnValue = Option_U128Z(
+					cType: self.cType!.next_user_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
+					anchor: self
+				)
+				.getValue()
+
+				return returnValue
+			}
+
+			/// The total fee, in milli-satoshis, which was earned as a result of the payment.
 			///
 			/// Note that if we force-closed the channel over which we forwarded an HTLC while the HTLC
 			/// was pending, the amount the next hop claimed will have been rounded down to the nearest
@@ -3190,12 +3179,36 @@ extension Bindings {
 			/// If the channel which sent us the payment has been force-closed, we will claim the funds
 			/// via an on-chain transaction. In that case we do not yet know the on-chain transaction
 			/// fees which we will spend and will instead set this to `None`. It is possible duplicate
-			/// `PaymentForwarded` events are generated for the same payment iff `fee_earned_msat` is
+			/// `PaymentForwarded` events are generated for the same payment iff `total_fee_earned_msat` is
 			/// `None`.
-			public func getFeeEarnedMsat() -> UInt64? {
+			public func getTotalFeeEarnedMsat() -> UInt64? {
 				// return value (do some wrapping)
 				let returnValue = Option_u64Z(
-					cType: self.cType!.fee_earned_msat, instantiationContext: "Event.swift::\(#function):\(#line)",
+					cType: self.cType!.total_fee_earned_msat,
+					instantiationContext: "Event.swift::\(#function):\(#line)", anchor: self
+				)
+				.getValue()
+
+				return returnValue
+			}
+
+			/// The share of the total fee, in milli-satoshis, which was withheld in addition to the
+			/// forwarding fee.
+			///
+			/// This will only be `Some` if we forwarded an intercepted HTLC with less than the
+			/// expected amount. This means our counterparty accepted to receive less than the invoice
+			/// amount, e.g., by claiming the payment featuring a corresponding
+			/// [`PaymentClaimable::counterparty_skimmed_fee_msat`].
+			///
+			/// Will also always be `None` for events serialized with LDK prior to version 0.0.122.
+			///
+			/// The caveat described above the `total_fee_earned_msat` field applies here as well.
+			///
+			/// [`PaymentClaimable::counterparty_skimmed_fee_msat`]: Self::PaymentClaimable::counterparty_skimmed_fee_msat
+			public func getSkimmedFeeMsat() -> UInt64? {
+				// return value (do some wrapping)
+				let returnValue = Option_u64Z(
+					cType: self.cType!.skimmed_fee_msat, instantiationContext: "Event.swift::\(#function):\(#line)",
 					anchor: self
 				)
 				.getValue()
@@ -3214,7 +3227,7 @@ extension Bindings {
 
 			/// The final amount forwarded, in milli-satoshis, after the fee is deducted.
 			///
-			/// The caveat described above the `fee_earned_msat` field applies here as well.
+			/// The caveat described above the `total_fee_earned_msat` field applies here as well.
 			public func getOutboundAmountForwardedMsat() -> UInt64? {
 				// return value (do some wrapping)
 				let returnValue = Option_u64Z(
@@ -3287,13 +3300,11 @@ extension Bindings {
 
 
 			/// The `channel_id` of the channel that is pending confirmation.
-			public func getChannelId() -> [UInt8] {
+			public func getChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3320,13 +3331,13 @@ extension Bindings {
 			/// The `temporary_channel_id` this channel used to be known by during channel establishment.
 			///
 			/// Will be `None` for channels created prior to LDK version 0.0.115.
-			public func getFormerTemporaryChannelId() -> [UInt8]? {
+			///
+			/// Note that this (or a relevant inner pointer) may be NULL or all-0s to represent None
+			public func getFormerTemporaryChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = Option_ThirtyTwoBytesZ(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.former_temporary_channel_id,
-					instantiationContext: "Event.swift::\(#function):\(#line)", anchor: self
-				)
-				.getValue()
+					instantiationContext: "Event.swift::\(#function):\(#line)", anchor: self)
 
 				return returnValue
 			}
@@ -3348,6 +3359,20 @@ extension Bindings {
 				// return value (do some wrapping)
 				let returnValue = Bindings.OutPoint(
 					cType: self.cType!.funding_txo, instantiationContext: "Event.swift::\(#function):\(#line)",
+					anchor: self)
+
+				return returnValue
+			}
+
+			/// The features that this channel will operate with.
+			///
+			/// Will be `None` for channels created prior to LDK version 0.0.122.
+			///
+			/// Note that this (or a relevant inner pointer) may be NULL or all-0s to represent None
+			public func getChannelType() -> Bindings.ChannelTypeFeatures {
+				// return value (do some wrapping)
+				let returnValue = Bindings.ChannelTypeFeatures(
+					cType: self.cType!.channel_type, instantiationContext: "Event.swift::\(#function):\(#line)",
 					anchor: self)
 
 				return returnValue
@@ -3413,13 +3438,11 @@ extension Bindings {
 
 
 			/// The `channel_id` of the channel that is ready.
-			public func getChannelId() -> [UInt8] {
+			public func getChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3527,13 +3550,11 @@ extension Bindings {
 
 			/// The `channel_id` of the channel which has been closed. Note that on-chain transactions
 			/// resolving the channel are likely still awaiting confirmation.
-			public func getChannelId() -> [UInt8] {
+			public func getChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3673,13 +3694,11 @@ extension Bindings {
 
 
 			/// The channel_id of the channel which has been closed.
-			public func getChannelId() -> [UInt8] {
+			public func getChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3764,13 +3783,11 @@ extension Bindings {
 			///
 			/// [`ChannelManager::accept_inbound_channel`]: crate::ln::channelmanager::ChannelManager::accept_inbound_channel
 			/// [`ChannelManager::force_close_without_broadcasting_txn`]: crate::ln::channelmanager::ChannelManager::force_close_without_broadcasting_txn
-			public func getTemporaryChannelId() -> [UInt8] {
+			public func getTemporaryChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.temporary_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}
@@ -3896,13 +3913,11 @@ extension Bindings {
 
 
 			/// The channel over which the HTLC was received.
-			public func getPrevChannelId() -> [UInt8] {
+			public func getPrevChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.prev_channel_id, instantiationContext: "Event.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}

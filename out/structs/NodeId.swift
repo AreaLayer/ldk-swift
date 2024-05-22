@@ -123,6 +123,31 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Create a new NodeId from a slice of bytes
+		public class func fromSlice(bytes: [UInt8]) -> Result_NodeIdDecodeErrorZ {
+			// native call variable prep
+
+			let bytesPrimitiveWrapper = u8slice(
+				value: bytes, instantiationContext: "NodeId.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult = NodeId_from_slice(bytesPrimitiveWrapper.cType!)
+
+			// cleanup
+
+			// for elided types, we need this
+			bytesPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_NodeIdDecodeErrorZ(
+				cType: nativeCallResult, instantiationContext: "NodeId.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 		/// Get the public key slice from this NodeId
 		public func asSlice() -> [UInt8] {
 			// native call variable prep

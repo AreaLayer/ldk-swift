@@ -315,7 +315,9 @@ extension Bindings {
 		}
 
 		/// Returns the first node in the path.
-		public func firstNode() -> [UInt8] {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func firstNode() -> [UInt8]? {
 			// native call variable prep
 
 
@@ -327,6 +329,15 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustPrimitiveWrapper
+			// Type: LDKPublicKey
+
+			if nativeCallResult.compressed_form == Bindings.arrayToUInt8Tuple33(array: [UInt8](repeating: 0, count: 33))
+			{
+				return nil
+			}
 
 
 			// return value (do some wrapping)

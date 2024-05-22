@@ -155,6 +155,31 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Constructs a new OutputSpender which calls the relevant methods on this_arg.
+		/// This copies the `inner` pointer in this_arg and thus the returned OutputSpender must be freed before this_arg is
+		public func asOutputSpender() -> OutputSpender {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKPhantomKeysManager>) in
+					PhantomKeysManager_as_OutputSpender(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = NativelyImplementedOutputSpender(
+				cType: nativeCallResult, instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)",
+				anchor: self)
+
+
+			return returnValue
+		}
+
 		/// Constructs a new SignerProvider which calls the relevant methods on this_arg.
 		/// This copies the `inner` pointer in this_arg and thus the returned SignerProvider must be freed before this_arg is
 		public func asSignerProvider() -> SignerProvider {
@@ -233,63 +258,6 @@ extension Bindings {
 					instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)")
 
 
-		}
-
-		/// See [`KeysManager::spend_spendable_outputs`] for documentation on this method.
-		public func spendSpendableOutputs(
-			descriptors: [SpendableOutputDescriptor], outputs: [TxOut], changeDestinationScript: [UInt8],
-			feerateSatPer1000Weight: UInt32, locktime: UInt32?
-		) -> Result_TransactionNoneZ {
-			// native call variable prep
-
-			let descriptorsVector = Vec_SpendableOutputDescriptorZ(
-				array: descriptors, instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)"
-			)
-			.dangle()
-
-			let outputsVector = Vec_TxOutZ(
-				array: outputs, instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)"
-			)
-			.dangle()
-
-			let changeDestinationScriptVector = Vec_u8Z(
-				array: changeDestinationScript, instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)"
-			)
-			.dangle()
-
-			let locktimeOption = Option_u32Z(
-				some: locktime, instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-
-			// native method call
-			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKPhantomKeysManager>) in
-					PhantomKeysManager_spend_spendable_outputs(
-						thisArgPointer, descriptorsVector.cType!, outputsVector.cType!,
-						changeDestinationScriptVector.cType!, feerateSatPer1000Weight, locktimeOption.cType!)
-				}
-
-
-			// cleanup
-
-			// descriptorsVector.noOpRetain()
-
-			// outputsVector.noOpRetain()
-
-			// changeDestinationScriptVector.noOpRetain()
-
-
-			// return value (do some wrapping)
-			let returnValue = Result_TransactionNoneZ(
-				cType: nativeCallResult, instantiationContext: "PhantomKeysManager.swift::\(#function):\(#line)",
-				anchor: self
-			)
-			.dangle(false)
-
-
-			return returnValue
 		}
 
 		/// See [`KeysManager::derive_channel_keys`] for documentation on this method.

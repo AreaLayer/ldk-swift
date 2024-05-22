@@ -286,6 +286,28 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Returns whether the node has only announced Tor addresses.
+		public func isTorOnly() -> Bool {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKNodeInfo>) in
+					NodeInfo_is_tor_only(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// Serialize the NodeInfo object into a byte array which can be read by NodeInfo_read
 		public func write() -> [UInt8] {
 			// native call variable prep

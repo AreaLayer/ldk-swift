@@ -65,6 +65,10 @@ extension Bindings {
 			case HTLCEvent
 
 			/// Indicates we broadcasted the channel's latest commitment transaction and thus closed the
+			/// channel. Holds information about the channel and why it was closed.
+			case HolderForceClosedWithInfo
+
+			/// Indicates we broadcasted the channel's latest commitment transaction and thus closed the
 			/// channel.
 			case HolderForceClosed
 
@@ -80,6 +84,9 @@ extension Bindings {
 			switch self.cType!.tag {
 				case LDKMonitorEvent_HTLCEvent:
 					return .HTLCEvent
+
+				case LDKMonitorEvent_HolderForceClosedWithInfo:
+					return .HolderForceClosedWithInfo
 
 				case LDKMonitorEvent_HolderForceClosed:
 					return .HolderForceClosed
@@ -155,6 +162,29 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Utility method to constructs a new HolderForceClosedWithInfo-variant MonitorEvent
+		public class func initWithHolderForceClosedWithInfo(
+			reason: ClosureReason, outpoint: Bindings.OutPoint, channelId: Bindings.ChannelId
+		) -> MonitorEvent {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = MonitorEvent_holder_force_closed_with_info(
+				reason.danglingClone().cType!, outpoint.dynamicallyDangledClone().cType!,
+				channelId.dynamicallyDangledClone().cType!)
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = MonitorEvent(
+				cType: nativeCallResult, instantiationContext: "MonitorEvent.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 		/// Utility method to constructs a new HolderForceClosed-variant MonitorEvent
 		public class func initWithHolderForceClosed(a: Bindings.OutPoint) -> MonitorEvent {
 			// native call variable prep
@@ -175,12 +205,16 @@ extension Bindings {
 		}
 
 		/// Utility method to constructs a new Completed-variant MonitorEvent
-		public class func initWithCompleted(fundingTxo: Bindings.OutPoint, monitorUpdateId: UInt64) -> MonitorEvent {
+		public class func initWithCompleted(
+			fundingTxo: Bindings.OutPoint, channelId: Bindings.ChannelId, monitorUpdateId: UInt64
+		) -> MonitorEvent {
 			// native call variable prep
 
 
 			// native method call
-			let nativeCallResult = MonitorEvent_completed(fundingTxo.dynamicallyDangledClone().cType!, monitorUpdateId)
+			let nativeCallResult = MonitorEvent_completed(
+				fundingTxo.dynamicallyDangledClone().cType!, channelId.dynamicallyDangledClone().cType!, monitorUpdateId
+			)
 
 			// cleanup
 
@@ -281,6 +315,16 @@ extension Bindings {
 				anchor: self)
 		}
 
+		public func getValueAsHolderForceClosedWithInfo() -> HolderForceClosedWithInfo? {
+			if self.cType?.tag != LDKMonitorEvent_HolderForceClosedWithInfo {
+				return nil
+			}
+
+			return MonitorEvent_LDKHolderForceClosedWithInfo_Body(
+				cType: self.cType!.holder_force_closed_with_info,
+				instantiationContext: "MonitorEvent.swift::\(#function):\(#line)", anchor: self)
+		}
+
 		public func getValueAsHolderForceClosed() -> Bindings.OutPoint? {
 			if self.cType?.tag != LDKMonitorEvent_HolderForceClosed {
 				return nil
@@ -325,6 +369,97 @@ extension Bindings {
 					"Not freeing MonitorEvent \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
 				)
 			}
+		}
+
+
+		///
+		internal typealias MonitorEvent_LDKHolderForceClosedWithInfo_Body = HolderForceClosedWithInfo
+
+
+		///
+		public class HolderForceClosedWithInfo: NativeTypeWrapper {
+
+
+			/// Set to false to suppress an individual type's deinit log statements.
+			/// Only applicable when log threshold is set to `.Debug`.
+			public static var enableDeinitLogging = true
+
+			/// Set to true to suspend the freeing of this type's associated Rust memory.
+			/// Should only ever be used for debugging purposes, and will likely be
+			/// deprecated soon.
+			public static var suspendFreedom = false
+
+			private static var instanceCounter: UInt = 0
+			internal let instanceNumber: UInt
+
+			internal var cType: LDKMonitorEvent_LDKHolderForceClosedWithInfo_Body?
+
+			internal init(cType: LDKMonitorEvent_LDKHolderForceClosedWithInfo_Body, instantiationContext: String) {
+				Self.instanceCounter += 1
+				self.instanceNumber = Self.instanceCounter
+				self.cType = cType
+
+				super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
+			}
+
+			internal init(
+				cType: LDKMonitorEvent_LDKHolderForceClosedWithInfo_Body, instantiationContext: String,
+				anchor: NativeTypeWrapper
+			) {
+				Self.instanceCounter += 1
+				self.instanceNumber = Self.instanceCounter
+				self.cType = cType
+
+				super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
+				self.dangling = true
+				try! self.addAnchor(anchor: anchor)
+			}
+
+			internal init(
+				cType: LDKMonitorEvent_LDKHolderForceClosedWithInfo_Body, instantiationContext: String,
+				anchor: NativeTypeWrapper, dangle: Bool = false
+			) {
+				Self.instanceCounter += 1
+				self.instanceNumber = Self.instanceCounter
+				self.cType = cType
+
+				super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
+				self.dangling = dangle
+				try! self.addAnchor(anchor: anchor)
+			}
+
+
+			/// The reason the channel was closed.
+			public func getReason() -> ClosureReason {
+				// return value (do some wrapping)
+				let returnValue = ClosureReason(
+					cType: self.cType!.reason, instantiationContext: "MonitorEvent.swift::\(#function):\(#line)",
+					anchor: self)
+
+				return returnValue
+			}
+
+			/// The funding outpoint of the channel.
+			public func getOutpoint() -> Bindings.OutPoint {
+				// return value (do some wrapping)
+				let returnValue = Bindings.OutPoint(
+					cType: self.cType!.outpoint, instantiationContext: "MonitorEvent.swift::\(#function):\(#line)",
+					anchor: self)
+
+				return returnValue
+			}
+
+			/// The channel ID of the channel.
+			public func getChannelId() -> Bindings.ChannelId {
+				// return value (do some wrapping)
+				let returnValue = Bindings.ChannelId(
+					cType: self.cType!.channel_id, instantiationContext: "MonitorEvent.swift::\(#function):\(#line)",
+					anchor: self)
+
+				return returnValue
+			}
+
+
 		}
 
 
@@ -389,6 +524,16 @@ extension Bindings {
 				// return value (do some wrapping)
 				let returnValue = Bindings.OutPoint(
 					cType: self.cType!.funding_txo, instantiationContext: "MonitorEvent.swift::\(#function):\(#line)",
+					anchor: self)
+
+				return returnValue
+			}
+
+			/// The channel ID of the channel associated with the [`ChannelMonitor`]
+			public func getChannelId() -> Bindings.ChannelId {
+				// return value (do some wrapping)
+				let returnValue = Bindings.ChannelId(
+					cType: self.cType!.channel_id, instantiationContext: "MonitorEvent.swift::\(#function):\(#line)",
 					anchor: self)
 
 				return returnValue

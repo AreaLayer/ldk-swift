@@ -3,12 +3,12 @@
 #endif
 
 /// A tuple of 2 elements. See the individual fields for the types contained.
-internal typealias Tuple_ThirtyTwoBytesPublicKeyZ = Bindings.Tuple_ThirtyTwoBytesPublicKeyZ
+internal typealias Tuple_ChannelIdPublicKeyZ = Bindings.Tuple_ChannelIdPublicKeyZ
 
 extension Bindings {
 
 	/// A tuple of 2 elements. See the individual fields for the types contained.
-	internal class Tuple_ThirtyTwoBytesPublicKeyZ: NativeTypeWrapper {
+	internal class Tuple_ChannelIdPublicKeyZ: NativeTypeWrapper {
 
 
 		/// Set to false to suppress an individual type's deinit log statements.
@@ -23,9 +23,9 @@ extension Bindings {
 		private static var instanceCounter: UInt = 0
 		internal let instanceNumber: UInt
 
-		internal var cType: LDKC2Tuple_ThirtyTwoBytesPublicKeyZ?
+		internal var cType: LDKC2Tuple_ChannelIdPublicKeyZ?
 
-		internal init(cType: LDKC2Tuple_ThirtyTwoBytesPublicKeyZ, instantiationContext: String) {
+		internal init(cType: LDKC2Tuple_ChannelIdPublicKeyZ, instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -33,9 +33,7 @@ extension Bindings {
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 		}
 
-		internal init(
-			cType: LDKC2Tuple_ThirtyTwoBytesPublicKeyZ, instantiationContext: String, anchor: NativeTypeWrapper
-		) {
+		internal init(cType: LDKC2Tuple_ChannelIdPublicKeyZ, instantiationContext: String, anchor: NativeTypeWrapper) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -46,7 +44,7 @@ extension Bindings {
 		}
 
 		internal init(
-			cType: LDKC2Tuple_ThirtyTwoBytesPublicKeyZ, instantiationContext: String, anchor: NativeTypeWrapper,
+			cType: LDKC2Tuple_ChannelIdPublicKeyZ, instantiationContext: String, anchor: NativeTypeWrapper,
 			dangle: Bool = false
 		) {
 			Self.instanceCounter += 1
@@ -59,22 +57,21 @@ extension Bindings {
 		}
 
 
-		internal convenience init(tuple: ([UInt8], [UInt8]), instantiationContext: String) {
+		internal convenience init(tuple: (ChannelId, [UInt8]), instantiationContext: String) {
 			self.init(a: tuple.0, b: tuple.1, instantiationContext: instantiationContext)
 		}
 
 
 		/// Creates a new tuple which has the same data as `orig`
 		/// but with all dynamically-allocated buffers duplicated in new buffers.
-		internal func clone() -> Tuple_ThirtyTwoBytesPublicKeyZ {
+		internal func clone() -> Tuple_ChannelIdPublicKeyZ {
 			// native call variable prep
 
 
 			// native method call
 			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) {
-					(origPointer: UnsafePointer<LDKC2Tuple_ThirtyTwoBytesPublicKeyZ>) in
-					C2Tuple_ThirtyTwoBytesPublicKeyZ_clone(origPointer)
+				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKC2Tuple_ChannelIdPublicKeyZ>) in
+					C2Tuple_ChannelIdPublicKeyZ_clone(origPointer)
 				}
 
 
@@ -82,33 +79,26 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = Tuple_ThirtyTwoBytesPublicKeyZ(
-				cType: nativeCallResult,
-				instantiationContext: "Tuple_ThirtyTwoBytesPublicKeyZ.swift::\(#function):\(#line)")
+			let returnValue = Tuple_ChannelIdPublicKeyZ(
+				cType: nativeCallResult, instantiationContext: "Tuple_ChannelIdPublicKeyZ.swift::\(#function):\(#line)")
 
 
 			return returnValue
 		}
 
-		/// Creates a new C2Tuple_ThirtyTwoBytesPublicKeyZ from the contained elements.
-		public init(a: [UInt8], b: [UInt8], instantiationContext: String) {
+		/// Creates a new C2Tuple_ChannelIdPublicKeyZ from the contained elements.
+		public init(a: ChannelId, b: [UInt8], instantiationContext: String) {
 			// native call variable prep
 
-			let aPrimitiveWrapper = ThirtyTwoBytes(
-				value: a, instantiationContext: "Tuple_ThirtyTwoBytesPublicKeyZ.swift::\(#function):\(#line)")
-
 			let bPrimitiveWrapper = PublicKey(
-				value: b, instantiationContext: "Tuple_ThirtyTwoBytesPublicKeyZ.swift::\(#function):\(#line)")
+				value: b, instantiationContext: "Tuple_ChannelIdPublicKeyZ.swift::\(#function):\(#line)")
 
 
 			// native method call
-			let nativeCallResult = C2Tuple_ThirtyTwoBytesPublicKeyZ_new(
-				aPrimitiveWrapper.cType!, bPrimitiveWrapper.cType!)
+			let nativeCallResult = C2Tuple_ChannelIdPublicKeyZ_new(
+				a.dynamicallyDangledClone().cType!, bPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			aPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			bPrimitiveWrapper.noOpRetain()
@@ -116,7 +106,7 @@ extension Bindings {
 
 			/*
 						// return value (do some wrapping)
-						let returnValue = Tuple_ThirtyTwoBytesPublicKeyZ(cType: nativeCallResult, instantiationContext: "Tuple_ThirtyTwoBytesPublicKeyZ.swift::\(#function):\(#line)")
+						let returnValue = Tuple_ChannelIdPublicKeyZ(cType: nativeCallResult, instantiationContext: "Tuple_ChannelIdPublicKeyZ.swift::\(#function):\(#line)")
 						*/
 
 
@@ -129,13 +119,13 @@ extension Bindings {
 
 		}
 
-		/// Frees any resources used by the C2Tuple_ThirtyTwoBytesPublicKeyZ.
+		/// Frees any resources used by the C2Tuple_ChannelIdPublicKeyZ.
 		internal func free() {
 			// native call variable prep
 
 
 			// native method call
-			let nativeCallResult = C2Tuple_ThirtyTwoBytesPublicKeyZ_free(self.cType!)
+			let nativeCallResult = C2Tuple_ChannelIdPublicKeyZ_free(self.cType!)
 
 			// cleanup
 
@@ -148,19 +138,19 @@ extension Bindings {
 		}
 
 
-		public func getValue() -> ([UInt8], [UInt8]) {
+		public func getValue() -> (ChannelId, [UInt8]) {
 			return (self.getA(), self.getB())
 		}
 
 
 		/// The element at position 0
-		public func getA() -> [UInt8] {
+		public func getA() -> ChannelId {
 			// return value (do some wrapping)
-			let returnValue = ThirtyTwoBytes(
-				cType: self.cType!.a,
-				instantiationContext: "Tuple_ThirtyTwoBytesPublicKeyZ.swift::\(#function):\(#line)", anchor: self
+			let returnValue = ChannelId(
+				cType: self.cType!.a, instantiationContext: "Tuple_ChannelIdPublicKeyZ.swift::\(#function):\(#line)",
+				anchor: self
 			)
-			.dangle().getValue()
+			.dangle()
 
 			return returnValue
 		}
@@ -169,8 +159,8 @@ extension Bindings {
 		public func getB() -> [UInt8] {
 			// return value (do some wrapping)
 			let returnValue = PublicKey(
-				cType: self.cType!.b,
-				instantiationContext: "Tuple_ThirtyTwoBytesPublicKeyZ.swift::\(#function):\(#line)", anchor: self
+				cType: self.cType!.b, instantiationContext: "Tuple_ChannelIdPublicKeyZ.swift::\(#function):\(#line)",
+				anchor: self
 			)
 			.dangle().getValue()
 
@@ -178,7 +168,7 @@ extension Bindings {
 		}
 
 
-		internal func danglingClone() -> Tuple_ThirtyTwoBytesPublicKeyZ {
+		internal func danglingClone() -> Tuple_ChannelIdPublicKeyZ {
 			let dangledClone = self.clone()
 			dangledClone.dangling = true
 			return dangledClone
@@ -192,14 +182,14 @@ extension Bindings {
 			if !self.dangling {
 				if Self.enableDeinitLogging {
 					Bindings.print(
-						"Freeing Tuple_ThirtyTwoBytesPublicKeyZ \(self.instanceNumber). (Origin: \(self.instantiationContext))"
+						"Freeing Tuple_ChannelIdPublicKeyZ \(self.instanceNumber). (Origin: \(self.instantiationContext))"
 					)
 				}
 
 				self.free()
 			} else if Self.enableDeinitLogging {
 				Bindings.print(
-					"Not freeing Tuple_ThirtyTwoBytesPublicKeyZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
+					"Not freeing Tuple_ChannelIdPublicKeyZ \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
 				)
 			}
 		}

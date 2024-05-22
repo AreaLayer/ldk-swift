@@ -166,24 +166,16 @@ extension Bindings {
 
 		}
 
-		/// Get a list of tuples mapping from node id to network addresses for peers which have
-		/// completed the initial handshake.
-		///
-		/// For outbound connections, the [`PublicKey`] will be the same as the `their_node_id` parameter
-		/// passed in to [`Self::new_outbound_connection`], however entries will only appear once the initial
-		/// handshake has completed and we are sure the remote peer has the private key for the given
-		/// [`PublicKey`].
-		///
-		/// The returned `Option`s will only be `Some` if an address had been previously given via
-		/// [`Self::new_outbound_connection`] or [`Self::new_inbound_connection`].
-		public func getPeerNodeIds() -> [([UInt8], SocketAddress?)] {
+		/// Returns a list of [`PeerDetails`] for connected peers that have completed the initial
+		/// handshake.
+		public func listPeers() -> [PeerDetails] {
 			// native call variable prep
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKPeerManager>) in
-					PeerManager_get_peer_node_ids(thisArgPointer)
+					PeerManager_list_peers(thisArgPointer)
 				}
 
 
@@ -191,10 +183,58 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = Vec_C2Tuple_PublicKeyCOption_SocketAddressZZZ(
+			let returnValue = Vec_PeerDetailsZ(
 				cType: nativeCallResult, instantiationContext: "PeerManager.swift::\(#function):\(#line)", anchor: self
 			)
 			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
+		/// Returns the [`PeerDetails`] of a connected peer that has completed the initial handshake.
+		///
+		/// Will return `None` if the peer is unknown or it hasn't completed the initial handshake.
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func peerByNodeId(theirNodeId: [UInt8]) -> PeerDetails? {
+			// native call variable prep
+
+			let theirNodeIdPrimitiveWrapper = PublicKey(
+				value: theirNodeId, instantiationContext: "PeerManager.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKPeerManager>) in
+					PeerManager_peer_by_node_id(thisArgPointer, theirNodeIdPrimitiveWrapper.cType!)
+				}
+
+
+			// cleanup
+
+			// for elided types, we need this
+			theirNodeIdPrimitiveWrapper.noOpRetain()
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKPeerDetails
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
+
+
+			// return value (do some wrapping)
+			let returnValue = PeerDetails(
+				cType: nativeCallResult, instantiationContext: "PeerManager.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue

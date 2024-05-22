@@ -277,6 +277,38 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Derives the \"tweak\" used in calculate [`DelayedPaymentKey::from_basepoint`].\n\n[`DelayedPaymentKey::from_basepoint`] calculates a private key as:\n`privkey = basepoint_secret + SHA256(per_commitment_point || basepoint)`\n\nThis calculates the hash part in the tweak derivation process, which is used to\nensure that each key is unique and cannot be guessed by an external party.
+		public func deriveAddTweak(perCommitmentPoint: [UInt8]) -> [UInt8] {
+			// native call variable prep
+
+			let perCommitmentPointPrimitiveWrapper = PublicKey(
+				value: perCommitmentPoint, instantiationContext: "DelayedPaymentBasepoint.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKDelayedPaymentBasepoint>) in
+					DelayedPaymentBasepoint_derive_add_tweak(thisArgPointer, perCommitmentPointPrimitiveWrapper.cType!)
+				}
+
+
+			// cleanup
+
+			// for elided types, we need this
+			perCommitmentPointPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = ThirtyTwoBytes(
+				cType: nativeCallResult, instantiationContext: "DelayedPaymentBasepoint.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
 		/// Serialize the DelayedPaymentBasepoint object into a byte array which can be read by DelayedPaymentBasepoint_read
 		public func write() -> [UInt8] {
 			// native call variable prep

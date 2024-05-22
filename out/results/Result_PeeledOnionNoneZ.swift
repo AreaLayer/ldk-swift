@@ -117,6 +117,30 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Creates a new CResult_PeeledOnionNoneZ which has the same data as `orig`
+		/// but with all dynamically-allocated buffers duplicated in new buffers.
+		internal func clone() -> Result_PeeledOnionNoneZ {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKCResult_PeeledOnionNoneZ>) in
+					CResult_PeeledOnionNoneZ_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_PeeledOnionNoneZ(
+				cType: nativeCallResult, instantiationContext: "Result_PeeledOnionNoneZ.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 
 		public func isOk() -> Bool {
 			return self.cType?.result_ok == true
@@ -141,6 +165,12 @@ extension Bindings {
 			return nil
 		}
 
+
+		internal func danglingClone() -> Result_PeeledOnionNoneZ {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
+		}
 
 		deinit {
 			if Bindings.suspendFreedom || Self.suspendFreedom {

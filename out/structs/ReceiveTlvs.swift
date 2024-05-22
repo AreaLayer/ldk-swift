@@ -180,8 +180,55 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Context for the receiver of this payment.
+		public func getPaymentContext() -> PaymentContext {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisPtrPointer: UnsafePointer<LDKReceiveTlvs>) in
+					ReceiveTlvs_get_payment_context(thisPtrPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = PaymentContext(
+				cType: nativeCallResult, instantiationContext: "ReceiveTlvs.swift::\(#function):\(#line)", anchor: self)
+
+
+			return returnValue
+		}
+
+		/// Context for the receiver of this payment.
+		public func setPaymentContext(val: PaymentContext) {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKReceiveTlvs>) in
+					ReceiveTlvs_set_payment_context(thisPtrPointer, val.danglingClone().cType!)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
 		/// Constructs a new ReceiveTlvs given each field
-		public init(paymentSecretArg: [UInt8], paymentConstraintsArg: PaymentConstraints) {
+		public init(
+			paymentSecretArg: [UInt8], paymentConstraintsArg: PaymentConstraints, paymentContextArg: PaymentContext
+		) {
 			// native call variable prep
 
 			let paymentSecretArgPrimitiveWrapper = ThirtyTwoBytes(
@@ -190,7 +237,8 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = ReceiveTlvs_new(
-				paymentSecretArgPrimitiveWrapper.cType!, paymentConstraintsArg.dynamicallyDangledClone().cType!)
+				paymentSecretArgPrimitiveWrapper.cType!, paymentConstraintsArg.dynamicallyDangledClone().cType!,
+				paymentContextArg.danglingClone().cType!)
 
 			// cleanup
 

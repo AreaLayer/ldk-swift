@@ -2,16 +2,14 @@
 	import LDKHeaders
 #endif
 
-/// The minimum amount required for an item in an [`Offer`], denominated in either bitcoin or
-/// another currency.
-public typealias Amount = Bindings.Amount
+/// An implementation of [`EntropySource`] using ChaCha20.
+public typealias RandomBytes = Bindings.RandomBytes
 
 extension Bindings {
 
 
-	/// The minimum amount required for an item in an [`Offer`], denominated in either bitcoin or
-	/// another currency.
-	public class Amount: NativeTypeWrapper {
+	/// An implementation of [`EntropySource`] using ChaCha20.
+	public class RandomBytes: NativeTypeWrapper {
 
 		let initialCFreeability: Bool
 
@@ -28,9 +26,9 @@ extension Bindings {
 		private static var instanceCounter: UInt = 0
 		internal let instanceNumber: UInt
 
-		internal var cType: LDKAmount?
+		internal var cType: LDKRandomBytes?
 
-		internal init(cType: LDKAmount, instantiationContext: String) {
+		internal init(cType: LDKRandomBytes, instantiationContext: String) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -38,7 +36,7 @@ extension Bindings {
 			super.init(conflictAvoidingVariableName: 0, instantiationContext: instantiationContext)
 		}
 
-		internal init(cType: LDKAmount, instantiationContext: String, anchor: NativeTypeWrapper) {
+		internal init(cType: LDKRandomBytes, instantiationContext: String, anchor: NativeTypeWrapper) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -48,7 +46,9 @@ extension Bindings {
 			try! self.addAnchor(anchor: anchor)
 		}
 
-		internal init(cType: LDKAmount, instantiationContext: String, anchor: NativeTypeWrapper, dangle: Bool = false) {
+		internal init(
+			cType: LDKRandomBytes, instantiationContext: String, anchor: NativeTypeWrapper, dangle: Bool = false
+		) {
 			Self.instanceCounter += 1
 			self.instanceNumber = Self.instanceCounter
 			self.cType = cType
@@ -59,13 +59,13 @@ extension Bindings {
 		}
 
 
-		/// Frees any resources used by the Amount, if is_owned is set and inner is non-NULL.
+		/// Frees any resources used by the RandomBytes, if is_owned is set and inner is non-NULL.
 		internal func free() {
 			// native call variable prep
 
 
 			// native method call
-			let nativeCallResult = Amount_free(self.cType!)
+			let nativeCallResult = RandomBytes_free(self.cType!)
 
 			// cleanup
 
@@ -77,15 +77,51 @@ extension Bindings {
 			return returnValue
 		}
 
-		/// Creates a copy of the Amount
-		internal func clone() -> Amount {
+		/// Creates a new instance using the given seed.
+		public init(seed: [UInt8]) {
+			// native call variable prep
+
+			let seedPrimitiveWrapper = ThirtyTwoBytes(
+				value: seed, instantiationContext: "RandomBytes.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult = RandomBytes_new(seedPrimitiveWrapper.cType!)
+
+			// cleanup
+
+			// for elided types, we need this
+			seedPrimitiveWrapper.noOpRetain()
+
+			self.initialCFreeability = nativeCallResult.is_owned
+
+
+			/*
+						// return value (do some wrapping)
+						let returnValue = RandomBytes(cType: nativeCallResult, instantiationContext: "RandomBytes.swift::\(#function):\(#line)")
+						*/
+
+
+			self.cType = nativeCallResult
+
+			Self.instanceCounter += 1
+			self.instanceNumber = Self.instanceCounter
+			super
+				.init(conflictAvoidingVariableName: 0, instantiationContext: "RandomBytes.swift::\(#function):\(#line)")
+
+
+		}
+
+		/// Constructs a new EntropySource which calls the relevant methods on this_arg.
+		/// This copies the `inner` pointer in this_arg and thus the returned EntropySource must be freed before this_arg is
+		public func asEntropySource() -> EntropySource {
 			// native call variable prep
 
 
 			// native method call
 			let nativeCallResult =
-				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKAmount>) in
-					Amount_clone(origPointer)
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKRandomBytes>) in
+					RandomBytes_as_EntropySource(thisArgPointer)
 				}
 
 
@@ -93,8 +129,8 @@ extension Bindings {
 
 
 			// return value (do some wrapping)
-			let returnValue = Amount(
-				cType: nativeCallResult, instantiationContext: "Amount.swift::\(#function):\(#line)")
+			let returnValue = NativelyImplementedEntropySource(
+				cType: nativeCallResult, instantiationContext: "RandomBytes.swift::\(#function):\(#line)", anchor: self)
 
 
 			return returnValue
@@ -112,25 +148,12 @@ extension Bindings {
 		}
 
 
-		internal func danglingClone() -> Amount {
-			let dangledClone = self.clone()
-			dangledClone.dangling = true
-			return dangledClone
-		}
-
-		internal func dynamicallyDangledClone() -> Amount {
-			let dangledClone = self.clone()
-			// if it's owned, i. e. controlled by Rust, it should dangle on our end
-			dangledClone.dangling = dangledClone.cType!.is_owned
-			return dangledClone
-		}
-
-		internal func setCFreeability(freeable: Bool) -> Amount {
+		internal func setCFreeability(freeable: Bool) -> RandomBytes {
 			self.cType!.is_owned = freeable
 			return self
 		}
 
-		internal func dynamicDangle() -> Amount {
+		internal func dynamicDangle() -> RandomBytes {
 			self.dangling = self.cType!.is_owned
 			return self
 		}
@@ -142,13 +165,14 @@ extension Bindings {
 
 			if !self.dangling {
 				if Self.enableDeinitLogging {
-					Bindings.print("Freeing Amount \(self.instanceNumber). (Origin: \(self.instantiationContext))")
+					Bindings.print("Freeing RandomBytes \(self.instanceNumber). (Origin: \(self.instantiationContext))")
 				}
 
 				self.free()
 			} else if Self.enableDeinitLogging {
 				Bindings.print(
-					"Not freeing Amount \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))")
+					"Not freeing RandomBytes \(self.instanceNumber) due to dangle. (Origin: \(self.instantiationContext))"
+				)
 			}
 		}
 

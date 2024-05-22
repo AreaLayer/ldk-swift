@@ -175,8 +175,6 @@ extension Bindings {
 		}
 
 		/// The minimum amount required for a successful payment of a single item.
-		///
-		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func amount() -> Amount? {
 			// native call variable prep
 
@@ -190,25 +188,12 @@ extension Bindings {
 
 			// cleanup
 
-			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
-			// Type group: RustStruct
-			// Type: LDKAmount
-
-			if nativeCallResult.inner == nil {
-				return nil
-			}
-
-			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
-			if pointerValue == 0 {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Amount(
+			let returnValue = Option_AmountZ(
 				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
 			)
-			.dangle(false)
+			.getValue()
 
 
 			return returnValue
@@ -216,7 +201,9 @@ extension Bindings {
 
 		/// A complete description of the purpose of the payment. Intended to be displayed to the user
 		/// but with the caveat that it has not been verified in any way.
-		public func description() -> PrintableString {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func description() -> PrintableString? {
 			// native call variable prep
 
 
@@ -228,6 +215,19 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKPrintableString
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
 
 
 			// return value (do some wrapping)
@@ -376,16 +376,16 @@ extension Bindings {
 
 			// return value (do some wrapping)
 			let returnValue = Quantity(
-				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
-			)
-			.dangle(false)
+				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self)
 
 
 			return returnValue
 		}
 
 		/// The public key used by the recipient to sign invoices.
-		public func signingPubkey() -> [UInt8] {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func signingPubkey() -> [UInt8]? {
 			// native call variable prep
 
 
@@ -398,12 +398,46 @@ extension Bindings {
 
 			// cleanup
 
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustPrimitiveWrapper
+			// Type: LDKPublicKey
+
+			if nativeCallResult.compressed_form == Bindings.arrayToUInt8Tuple33(array: [UInt8](repeating: 0, count: 33))
+			{
+				return nil
+			}
+
 
 			// return value (do some wrapping)
 			let returnValue = PublicKey(
 				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
 			)
 			.dangle(false).getValue()
+
+
+			return returnValue
+		}
+
+		/// Returns the id of the offer.
+		public func id() -> OfferId {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKOffer>) in
+					Offer_id(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = OfferId(
+				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
@@ -514,6 +548,181 @@ extension Bindings {
 			let nativeCallResult =
 				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKOffer>) in
 					Offer_expects_quantity(thisArgPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = nativeCallResult
+
+
+			return returnValue
+		}
+
+		/// Similar to [`Offer::request_invoice`] except it:
+		/// - derives the [`InvoiceRequest::payer_id`] such that a different key can be used for each
+		/// request,
+		/// - sets [`InvoiceRequest::payer_metadata`] when [`InvoiceRequestBuilder::build`] is called
+		/// such that it can be used by [`Bolt12Invoice::verify`] to determine if the invoice was
+		/// requested using a base [`ExpandedKey`] from which the payer id was derived, and
+		/// - includes the [`PaymentId`] encrypted in [`InvoiceRequest::payer_metadata`] so that it can
+		/// be used when sending the payment for the requested invoice.
+		///
+		/// Useful to protect the sender's privacy.
+		///
+		/// [`InvoiceRequest::payer_id`]: crate::offers::invoice_request::InvoiceRequest::payer_id
+		/// [`InvoiceRequest::payer_metadata`]: crate::offers::invoice_request::InvoiceRequest::payer_metadata
+		/// [`Bolt12Invoice::verify`]: crate::offers::invoice::Bolt12Invoice::verify
+		/// [`ExpandedKey`]: crate::ln::inbound_payment::ExpandedKey
+		public func requestInvoiceDerivingPayerId(
+			expandedKey: ExpandedKey, entropySource: EntropySource, paymentId: [UInt8]
+		) -> Result_InvoiceRequestWithDerivedPayerIdBuilderBolt12SemanticErrorZ {
+			// native call variable prep
+
+			let paymentIdPrimitiveWrapper = ThirtyTwoBytes(
+				value: paymentId, instantiationContext: "Offer.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKOffer>) in
+
+					withUnsafePointer(to: expandedKey.cType!) { (expandedKeyPointer: UnsafePointer<LDKExpandedKey>) in
+						Offer_request_invoice_deriving_payer_id(
+							thisArgPointer, expandedKeyPointer, entropySource.activate().cType!,
+							paymentIdPrimitiveWrapper.cType!)
+					}
+
+				}
+
+
+			// cleanup
+
+			// for elided types, we need this
+			paymentIdPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_InvoiceRequestWithDerivedPayerIdBuilderBolt12SemanticErrorZ(
+				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// Similar to [`Offer::request_invoice_deriving_payer_id`] except uses `payer_id` for the
+		/// [`InvoiceRequest::payer_id`] instead of deriving a different key for each request.
+		///
+		/// Useful for recurring payments using the same `payer_id` with different invoices.
+		///
+		/// [`InvoiceRequest::payer_id`]: crate::offers::invoice_request::InvoiceRequest::payer_id
+		public func requestInvoiceDerivingMetadata(
+			payerId: [UInt8], expandedKey: ExpandedKey, entropySource: EntropySource, paymentId: [UInt8]
+		) -> Result_InvoiceRequestWithExplicitPayerIdBuilderBolt12SemanticErrorZ {
+			// native call variable prep
+
+			let payerIdPrimitiveWrapper = PublicKey(
+				value: payerId, instantiationContext: "Offer.swift::\(#function):\(#line)")
+
+			let paymentIdPrimitiveWrapper = ThirtyTwoBytes(
+				value: paymentId, instantiationContext: "Offer.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKOffer>) in
+
+					withUnsafePointer(to: expandedKey.cType!) { (expandedKeyPointer: UnsafePointer<LDKExpandedKey>) in
+						Offer_request_invoice_deriving_metadata(
+							thisArgPointer, payerIdPrimitiveWrapper.cType!, expandedKeyPointer,
+							entropySource.activate().cType!, paymentIdPrimitiveWrapper.cType!)
+					}
+
+				}
+
+
+			// cleanup
+
+			// for elided types, we need this
+			payerIdPrimitiveWrapper.noOpRetain()
+
+			// for elided types, we need this
+			paymentIdPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_InvoiceRequestWithExplicitPayerIdBuilderBolt12SemanticErrorZ(
+				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// Creates an [`InvoiceRequestBuilder`] for the offer with the given `metadata` and `payer_id`,
+		/// which will be reflected in the `Bolt12Invoice` response.
+		///
+		/// The `metadata` is useful for including information about the derivation of `payer_id` such
+		/// that invoice response handling can be stateless. Also serves as payer-provided entropy while
+		/// hashing in the signature calculation.
+		///
+		/// This should not leak any information such as by using a simple BIP-32 derivation path.
+		/// Otherwise, payments may be correlated.
+		///
+		/// Errors if the offer contains unknown required features.
+		///
+		/// [`InvoiceRequest`]: crate::offers::invoice_request::InvoiceRequest
+		public func requestInvoice(metadata: [UInt8], payerId: [UInt8])
+			-> Result_InvoiceRequestWithExplicitPayerIdBuilderBolt12SemanticErrorZ
+		{
+			// native call variable prep
+
+			let metadataVector = Vec_u8Z(array: metadata, instantiationContext: "Offer.swift::\(#function):\(#line)")
+				.dangle()
+
+			let payerIdPrimitiveWrapper = PublicKey(
+				value: payerId, instantiationContext: "Offer.swift::\(#function):\(#line)")
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (thisArgPointer: UnsafePointer<LDKOffer>) in
+					Offer_request_invoice(thisArgPointer, metadataVector.cType!, payerIdPrimitiveWrapper.cType!)
+				}
+
+
+			// cleanup
+
+			// metadataVector.noOpRetain()
+
+			// for elided types, we need this
+			payerIdPrimitiveWrapper.noOpRetain()
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_InvoiceRequestWithExplicitPayerIdBuilderBolt12SemanticErrorZ(
+				cType: nativeCallResult, instantiationContext: "Offer.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
+
+
+			return returnValue
+		}
+
+		/// Generates a non-cryptographic 64-bit hash of the Offer.
+		public func hash() -> UInt64 {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (oPointer: UnsafePointer<LDKOffer>) in
+					Offer_hash(oPointer)
 				}
 
 

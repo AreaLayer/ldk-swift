@@ -72,6 +72,9 @@ extension Bindings {
 			/// intercept HTLC.
 			case InvalidForward
 
+			/// We couldn't decode the incoming onion to obtain the forwarding details.
+			case InvalidOnion
+
 			/// Failure scenario where an HTLC may have been forwarded to be intended for us,
 			/// but is invalid for some reason, so we reject it.
 			///
@@ -96,6 +99,9 @@ extension Bindings {
 
 				case LDKHTLCDestination_InvalidForward:
 					return .InvalidForward
+
+				case LDKHTLCDestination_InvalidOnion:
+					return .InvalidOnion
 
 				case LDKHTLCDestination_FailedPayment:
 					return .FailedPayment
@@ -150,27 +156,21 @@ extension Bindings {
 		}
 
 		/// Utility method to constructs a new NextHopChannel-variant HTLCDestination
-		public class func initWithNextHopChannel(nodeId: [UInt8], channelId: [UInt8]) -> HTLCDestination {
+		public class func initWithNextHopChannel(nodeId: [UInt8], channelId: Bindings.ChannelId) -> HTLCDestination {
 			// native call variable prep
 
 			let nodeIdPrimitiveWrapper = PublicKey(
 				value: nodeId, instantiationContext: "HTLCDestination.swift::\(#function):\(#line)")
 
-			let channelIdPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelId, instantiationContext: "HTLCDestination.swift::\(#function):\(#line)")
-
 
 			// native method call
 			let nativeCallResult = HTLCDestination_next_hop_channel(
-				nodeIdPrimitiveWrapper.cType!, channelIdPrimitiveWrapper.cType!)
+				nodeIdPrimitiveWrapper.cType!, channelId.dynamicallyDangledClone().cType!)
 
 			// cleanup
 
 			// for elided types, we need this
 			nodeIdPrimitiveWrapper.noOpRetain()
-
-			// for elided types, we need this
-			channelIdPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -207,6 +207,25 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = HTLCDestination_invalid_forward(requestedForwardScid)
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = HTLCDestination(
+				cType: nativeCallResult, instantiationContext: "HTLCDestination.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
+		/// Utility method to constructs a new InvalidOnion-variant HTLCDestination
+		public class func initWithInvalidOnion() -> HTLCDestination {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult = HTLCDestination_invalid_onion()
 
 			// cleanup
 
@@ -464,13 +483,11 @@ extension Bindings {
 			}
 
 			/// The outgoing `channel_id` between us and the next node.
-			public func getChannelId() -> [UInt8] {
+			public func getChannelId() -> Bindings.ChannelId {
 				// return value (do some wrapping)
-				let returnValue = ThirtyTwoBytes(
+				let returnValue = Bindings.ChannelId(
 					cType: self.cType!.channel_id, instantiationContext: "HTLCDestination.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}

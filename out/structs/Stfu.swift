@@ -76,7 +76,7 @@ extension Bindings {
 		}
 
 		/// The channel ID where quiescence is intended
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -89,37 +89,30 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "Stfu.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID where quiescence is intended
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "Stfu.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKStfu>) in
-					Stfu_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					Stfu_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -174,20 +167,14 @@ extension Bindings {
 		}
 
 		/// Constructs a new Stfu given each field
-		public init(channelIdArg: [UInt8], initiatorArg: UInt8) {
+		public init(channelIdArg: ChannelId, initiatorArg: UInt8) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "Stfu.swift::\(#function):\(#line)")
 
 
 			// native method call
-			let nativeCallResult = Stfu_new(channelIdArgPrimitiveWrapper.cType!, initiatorArg)
+			let nativeCallResult = Stfu_new(channelIdArg.dynamicallyDangledClone().cType!, initiatorArg)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			self.initialCFreeability = nativeCallResult.is_owned
 

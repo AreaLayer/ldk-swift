@@ -85,7 +85,7 @@ extension Bindings {
 		///
 		/// All-0s indicates a general error unrelated to a specific channel, after which all channels
 		/// with the sending peer should be closed.
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -98,13 +98,12 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "ErrorMessage.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
@@ -114,24 +113,18 @@ extension Bindings {
 		///
 		/// All-0s indicates a general error unrelated to a specific channel, after which all channels
 		/// with the sending peer should be closed.
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "ErrorMessage.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKErrorMessage>) in
-					ErrorMessage_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					ErrorMessage_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -203,11 +196,8 @@ extension Bindings {
 		}
 
 		/// Constructs a new ErrorMessage given each field
-		public init(channelIdArg: [UInt8], dataArg: String) {
+		public init(channelIdArg: ChannelId, dataArg: String) {
 			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "ErrorMessage.swift::\(#function):\(#line)")
 
 			let dataArgPrimitiveWrapper = Str(
 				value: dataArg, instantiationContext: "ErrorMessage.swift::\(#function):\(#line)"
@@ -216,12 +206,10 @@ extension Bindings {
 
 
 			// native method call
-			let nativeCallResult = ErrorMessage_new(channelIdArgPrimitiveWrapper.cType!, dataArgPrimitiveWrapper.cType!)
+			let nativeCallResult = ErrorMessage_new(
+				channelIdArg.dynamicallyDangledClone().cType!, dataArgPrimitiveWrapper.cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			// for elided types, we need this
 			dataArgPrimitiveWrapper.noOpRetain()

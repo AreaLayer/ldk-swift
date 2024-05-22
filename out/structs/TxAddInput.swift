@@ -78,7 +78,7 @@ extension Bindings {
 		}
 
 		/// The channel ID
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -91,37 +91,30 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "TxAddInput.swift::\(#function):\(#line)", anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
 		}
 
 		/// The channel ID
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "TxAddInput.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKTxAddInput>) in
-					TxAddInput_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					TxAddInput_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -316,24 +309,18 @@ extension Bindings {
 
 		/// Constructs a new TxAddInput given each field
 		public init(
-			channelIdArg: [UInt8], serialIdArg: UInt64, prevtxArg: TransactionU16LenLimited, prevtxOutArg: UInt32,
+			channelIdArg: ChannelId, serialIdArg: UInt64, prevtxArg: TransactionU16LenLimited, prevtxOutArg: UInt32,
 			sequenceArg: UInt32
 		) {
 			// native call variable prep
 
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "TxAddInput.swift::\(#function):\(#line)")
-
 
 			// native method call
 			let nativeCallResult = TxAddInput_new(
-				channelIdArgPrimitiveWrapper.cType!, serialIdArg, prevtxArg.dynamicallyDangledClone().cType!,
+				channelIdArg.dynamicallyDangledClone().cType!, serialIdArg, prevtxArg.dynamicallyDangledClone().cType!,
 				prevtxOutArg, sequenceArg)
 
 			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
 
 			self.initialCFreeability = nativeCallResult.is_owned
 

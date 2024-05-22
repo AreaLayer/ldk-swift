@@ -196,7 +196,9 @@ extension Bindings {
 
 		/// The channel id of the channel pertaining to the logged record. May be a temporary id before
 		/// the channel has been funded.
-		public func getChannelId() -> [UInt8]? {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func getChannelId() -> ChannelId? {
 			// native call variable prep
 
 
@@ -209,12 +211,25 @@ extension Bindings {
 
 			// cleanup
 
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKChannelId
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
+
 
 			// return value (do some wrapping)
-			let returnValue = Option_ThirtyTwoBytesZ(
+			let returnValue = ChannelId(
 				cType: nativeCallResult, instantiationContext: "Record.swift::\(#function):\(#line)", anchor: self
 			)
-			.getValue()
+			.dangle(false)
 
 
 			return returnValue
@@ -222,19 +237,16 @@ extension Bindings {
 
 		/// The channel id of the channel pertaining to the logged record. May be a temporary id before
 		/// the channel has been funded.
-		public func setChannelId(val: [UInt8]?) {
+		///
+		/// Note that val (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valOption = Option_ThirtyTwoBytesZ(
-				some: val, instantiationContext: "Record.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) { (thisPtrPointer: UnsafeMutablePointer<LDKRecord>) in
-					Record_set_channel_id(thisPtrPointer, valOption.cType!)
+					Record_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
@@ -454,19 +466,15 @@ extension Bindings {
 		/// Constructs a new Record given each field
 		///
 		/// Note that peer_id_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
+		/// Note that channel_id_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public init(
-			levelArg: Level, peerIdArg: [UInt8], channelIdArg: [UInt8]?, argsArg: String, modulePathArg: String,
+			levelArg: Level, peerIdArg: [UInt8], channelIdArg: ChannelId, argsArg: String, modulePathArg: String,
 			fileArg: String, lineArg: UInt32
 		) {
 			// native call variable prep
 
 			let peerIdArgPrimitiveWrapper = PublicKey(
 				value: peerIdArg, instantiationContext: "Record.swift::\(#function):\(#line)")
-
-			let channelIdArgOption = Option_ThirtyTwoBytesZ(
-				some: channelIdArg, instantiationContext: "Record.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
 
 			let argsArgPrimitiveWrapper = Str(
 				value: argsArg, instantiationContext: "Record.swift::\(#function):\(#line)"
@@ -486,7 +494,7 @@ extension Bindings {
 
 			// native method call
 			let nativeCallResult = Record_new(
-				levelArg.getCValue(), peerIdArgPrimitiveWrapper.cType!, channelIdArgOption.cType!,
+				levelArg.getCValue(), peerIdArgPrimitiveWrapper.cType!, channelIdArg.dynamicallyDangledClone().cType!,
 				argsArgPrimitiveWrapper.cType!, modulePathArgPrimitiveWrapper.cType!, fileArgPrimitiveWrapper.cType!,
 				lineArg)
 

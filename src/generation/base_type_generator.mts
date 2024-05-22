@@ -65,7 +65,7 @@ export abstract class BaseTypeGenerator<Type extends RustType> {
 		if (typeName && typeName.startsWith('LDK')) {
 			const ldkLessTypeName = typeName.substring('LDK'.length);
 			if (ldkLessTypeName.charAt(0) === 'C') {
-				if (ldkLessTypeName.startsWith('C2Tuple_') || ldkLessTypeName.startsWith('C3Tuple_')) {
+				if (ldkLessTypeName.startsWith('C2Tuple_') || ldkLessTypeName.startsWith('C3Tuple_') || ldkLessTypeName.startsWith('C4Tuple_')) {
 					return ldkLessTypeName.substring(2);
 				}
 

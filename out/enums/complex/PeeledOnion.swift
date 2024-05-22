@@ -128,20 +128,14 @@ extension Bindings {
 		}
 
 		/// Utility method to constructs a new Forward-variant PeeledOnion
-		public class func initForward(a: [UInt8], b: Bindings.OnionMessage) -> PeeledOnion {
+		public class func initForward(a: NextMessageHop, b: Bindings.OnionMessage) -> PeeledOnion {
 			// native call variable prep
-
-			let aPrimitiveWrapper = PublicKey(
-				value: a, instantiationContext: "PeeledOnion.swift::\(#function):\(#line)")
 
 
 			// native method call
-			let nativeCallResult = PeeledOnion_forward(aPrimitiveWrapper.cType!, b.dynamicallyDangledClone().cType!)
+			let nativeCallResult = PeeledOnion_forward(a.danglingClone().cType!, b.dynamicallyDangledClone().cType!)
 
 			// cleanup
-
-			// for elided types, we need this
-			aPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -284,13 +278,11 @@ extension Bindings {
 
 
 			///
-			public func get0() -> [UInt8] {
+			public func get0() -> NextMessageHop {
 				// return value (do some wrapping)
-				let returnValue = PublicKey(
+				let returnValue = NextMessageHop(
 					cType: self.cType!._0, instantiationContext: "PeeledOnion.swift::\(#function):\(#line)",
-					anchor: self
-				)
-				.getValue()
+					anchor: self)
 
 				return returnValue
 			}

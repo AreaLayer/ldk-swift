@@ -144,6 +144,38 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Creates a new CResult_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ which has the same data as `orig`
+		/// but with all dynamically-allocated buffers duplicated in new buffers.
+		internal func clone() -> Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) {
+					(
+						origPointer: UnsafePointer<
+							LDKCResult_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ
+						>
+					) in
+					CResult_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ(
+				cType: nativeCallResult,
+				instantiationContext:
+					"Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ.swift::\(#function):\(#line)"
+			)
+
+
+			return returnValue
+		}
+
 
 		public func isOk() -> Bool {
 			return self.cType?.result_ok == true
@@ -175,6 +207,12 @@ extension Bindings {
 			return nil
 		}
 
+
+		internal func danglingClone() -> Result_C3Tuple_PublicKeyOnionMessageCOption_CVec_SocketAddressZZZSendErrorZ {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
+		}
 
 		deinit {
 			if Bindings.suspendFreedom || Self.suspendFreedom {

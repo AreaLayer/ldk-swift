@@ -81,7 +81,7 @@ extension Bindings {
 		/// thereafter this is the txid of the funding transaction xor the funding transaction output).
 		/// Note that this means this value is *not* persistent - it can change once during the
 		/// lifetime of the channel.
-		public func getChannelId() -> [UInt8]? {
+		public func getChannelId() -> ChannelId {
 			// native call variable prep
 
 
@@ -94,13 +94,13 @@ extension Bindings {
 
 			// cleanup
 
-			guard let nativeCallResult = nativeCallResult else {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Bindings.UInt8Tuple32ToArray(tuple: nativeCallResult.pointee)
+			let returnValue = ChannelId(
+				cType: nativeCallResult, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)",
+				anchor: self
+			)
+			.dangle(false)
 
 
 			return returnValue
@@ -110,25 +110,19 @@ extension Bindings {
 		/// thereafter this is the txid of the funding transaction xor the funding transaction output).
 		/// Note that this means this value is *not* persistent - it can change once during the
 		/// lifetime of the channel.
-		public func setChannelId(val: [UInt8]) {
+		public func setChannelId(val: ChannelId) {
 			// native call variable prep
-
-			let valPrimitiveWrapper = ThirtyTwoBytes(
-				value: val, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)")
 
 
 			// native method call
 			let nativeCallResult =
 				withUnsafeMutablePointer(to: &self.cType!) {
 					(thisPtrPointer: UnsafeMutablePointer<LDKChannelDetails>) in
-					ChannelDetails_set_channel_id(thisPtrPointer, valPrimitiveWrapper.cType!)
+					ChannelDetails_set_channel_id(thisPtrPointer, val.dynamicallyDangledClone().cType!)
 				}
 
 
 			// cleanup
-
-			// for elided types, we need this
-			valPrimitiveWrapper.noOpRetain()
 
 
 			// return value (do some wrapping)
@@ -190,9 +184,6 @@ extension Bindings {
 		/// The Channel's funding transaction output, if we've negotiated the funding transaction with
 		/// our counterparty already.
 		///
-		/// Note that, if this has been set, `channel_id` will be equivalent to
-		/// `funding_txo.unwrap().to_channel_id()`.
-		///
 		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func getFundingTxo() -> OutPoint? {
 			// native call variable prep
@@ -234,9 +225,6 @@ extension Bindings {
 
 		/// The Channel's funding transaction output, if we've negotiated the funding transaction with
 		/// our counterparty already.
-		///
-		/// Note that, if this has been set, `channel_id` will be equivalent to
-		/// `funding_txo.unwrap().to_channel_id()`.
 		///
 		/// Note that val (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func setFundingTxo(val: OutPoint) {
@@ -1704,129 +1692,6 @@ extension Bindings {
 
 
 			return returnValue
-		}
-
-		/// Constructs a new ChannelDetails given each field
-		///
-		/// Note that funding_txo_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
-		/// Note that channel_type_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
-		/// Note that config_arg (or a relevant inner pointer) may be NULL or all-0s to represent None
-		public init(
-			channelIdArg: [UInt8], counterpartyArg: ChannelCounterparty, fundingTxoArg: OutPoint,
-			channelTypeArg: ChannelTypeFeatures, shortChannelIdArg: UInt64?, outboundScidAliasArg: UInt64?,
-			inboundScidAliasArg: UInt64?, channelValueSatoshisArg: UInt64, unspendablePunishmentReserveArg: UInt64?,
-			userChannelIdArg: [UInt8], feerateSatPer1000WeightArg: UInt32?, balanceMsatArg: UInt64,
-			outboundCapacityMsatArg: UInt64, nextOutboundHtlcLimitMsatArg: UInt64,
-			nextOutboundHtlcMinimumMsatArg: UInt64, inboundCapacityMsatArg: UInt64, confirmationsRequiredArg: UInt32?,
-			confirmationsArg: UInt32?, forceCloseSpendDelayArg: UInt16?, isOutboundArg: Bool, isChannelReadyArg: Bool,
-			channelShutdownStateArg: ChannelShutdownState?, isUsableArg: Bool, isPublicArg: Bool,
-			inboundHtlcMinimumMsatArg: UInt64?, inboundHtlcMaximumMsatArg: UInt64?, configArg: ChannelConfig
-		) {
-			// native call variable prep
-
-			let channelIdArgPrimitiveWrapper = ThirtyTwoBytes(
-				value: channelIdArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)")
-
-			let shortChannelIdArgOption = Option_u64Z(
-				some: shortChannelIdArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let outboundScidAliasArgOption = Option_u64Z(
-				some: outboundScidAliasArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let inboundScidAliasArgOption = Option_u64Z(
-				some: inboundScidAliasArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let unspendablePunishmentReserveArgOption = Option_u64Z(
-				some: unspendablePunishmentReserveArg,
-				instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let userChannelIdArgPrimitiveWrapper = U128(
-				value: userChannelIdArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)")
-
-			let feerateSatPer1000WeightArgOption = Option_u32Z(
-				some: feerateSatPer1000WeightArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let confirmationsRequiredArgOption = Option_u32Z(
-				some: confirmationsRequiredArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let confirmationsArgOption = Option_u32Z(
-				some: confirmationsArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let forceCloseSpendDelayArgOption = Option_u16Z(
-				some: forceCloseSpendDelayArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let channelShutdownStateArgOption = Option_ChannelShutdownStateZ(
-				some: channelShutdownStateArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let inboundHtlcMinimumMsatArgOption = Option_u64Z(
-				some: inboundHtlcMinimumMsatArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-			let inboundHtlcMaximumMsatArgOption = Option_u64Z(
-				some: inboundHtlcMaximumMsatArg, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-			)
-			.danglingClone()
-
-
-			// native method call
-			let nativeCallResult = ChannelDetails_new(
-				channelIdArgPrimitiveWrapper.cType!, counterpartyArg.dynamicallyDangledClone().cType!,
-				fundingTxoArg.dynamicallyDangledClone().cType!, channelTypeArg.dynamicallyDangledClone().cType!,
-				shortChannelIdArgOption.cType!, outboundScidAliasArgOption.cType!, inboundScidAliasArgOption.cType!,
-				channelValueSatoshisArg, unspendablePunishmentReserveArgOption.cType!,
-				userChannelIdArgPrimitiveWrapper.cType!, feerateSatPer1000WeightArgOption.cType!, balanceMsatArg,
-				outboundCapacityMsatArg, nextOutboundHtlcLimitMsatArg, nextOutboundHtlcMinimumMsatArg,
-				inboundCapacityMsatArg, confirmationsRequiredArgOption.cType!, confirmationsArgOption.cType!,
-				forceCloseSpendDelayArgOption.cType!, isOutboundArg, isChannelReadyArg,
-				channelShutdownStateArgOption.cType!, isUsableArg, isPublicArg, inboundHtlcMinimumMsatArgOption.cType!,
-				inboundHtlcMaximumMsatArgOption.cType!, configArg.dynamicallyDangledClone().cType!)
-
-			// cleanup
-
-			// for elided types, we need this
-			channelIdArgPrimitiveWrapper.noOpRetain()
-
-			// for elided types, we need this
-			userChannelIdArgPrimitiveWrapper.noOpRetain()
-
-			self.initialCFreeability = nativeCallResult.is_owned
-
-
-			/*
-						// return value (do some wrapping)
-						let returnValue = ChannelDetails(cType: nativeCallResult, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)")
-						*/
-
-
-			self.cType = nativeCallResult
-
-			Self.instanceCounter += 1
-			self.instanceNumber = Self.instanceCounter
-			super
-				.init(
-					conflictAvoidingVariableName: 0, instantiationContext: "ChannelDetails.swift::\(#function):\(#line)"
-				)
-
-
 		}
 
 		/// Creates a copy of the ChannelDetails

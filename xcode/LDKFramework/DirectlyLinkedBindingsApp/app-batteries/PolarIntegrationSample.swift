@@ -126,13 +126,13 @@ public class PolarIntegrationSample {
 
         // sleep for one second
         try await Task.sleep(nanoseconds: 1_000_000_000)
-        let connectedPeers = peerManager.getPeerNodeIds()
+        let connectedPeers = peerManager.listPeers()
 
         let channelValue: UInt64 = 1_300_000 // 1.3 million satoshis, or 0.013 BTC
         let channelValueBtcString = "0.013"
         let reserveAmount: UInt64 = 1000 // a thousand satoshis rserve
 		let userChannelId: [UInt8] = [UInt8](repeating: 42, count: 16);
-        let channelOpenResult = channelManager.createChannel(theirNetworkKey: lndPubkey, channelValueSatoshis: channelValue, pushMsat: reserveAmount, userChannelId: userChannelId, temporaryChannelId: nil, overrideConfig: config)
+        let channelOpenResult = channelManager.createChannel(theirNetworkKey: lndPubkey, channelValueSatoshis: channelValue, pushMsat: reserveAmount, userChannelId: userChannelId, temporaryChannelId: ChannelId.initWithZero(), overrideConfig: config)
 
         if let channelOpenError = channelOpenResult.getError() {
             print("error type: \(channelOpenError.getValueType())")
@@ -227,7 +227,7 @@ public class PolarIntegrationSample {
             try await Task.sleep(nanoseconds: 0_100_000_000)
         }
         
-        print(channelManagerConstructor.peerManager.getPeerNodeIds())
+        print(channelManagerConstructor.peerManager.listPeers())
 
     }
 
@@ -324,11 +324,11 @@ public class PolarIntegrationSample {
 
         class PolarChannelMonitorPersister: Persist {
             
-            override func persistNewChannel(channelId: Bindings.OutPoint, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
+            override func persistNewChannel(channelFundingOutpoint channelId: Bindings.OutPoint, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
                 return .Completed
             }
             
-            override func updatePersistedChannel(channelId: Bindings.OutPoint, update: Bindings.ChannelMonitorUpdate, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
+            override func updatePersistedChannel(channelFundingOutpoint channelId: Bindings.OutPoint, update: Bindings.ChannelMonitorUpdate, data: Bindings.ChannelMonitor, updateId: Bindings.MonitorUpdateId) -> Bindings.ChannelMonitorUpdateStatus {
                 return .Completed
             }
             

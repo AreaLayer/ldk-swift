@@ -24,6 +24,8 @@
 /// However, as long as [`ChannelMonitor`] backups are sound, no funds besides those used for
 /// unilateral chain closure fees are at risk.
 ///
+/// [`ChannelManager`]: lightning::ln::channelmanager::ChannelManager
+/// [`ChannelManager::timer_tick_occurred`]: lightning::ln::channelmanager::ChannelManager::timer_tick_occurred
 /// [`ChannelMonitor`]: lightning::chain::channelmonitor::ChannelMonitor
 /// [`Event`]: lightning::events::Event
 /// [`PeerManager::timer_tick_occurred`]: lightning::ln::peer_handler::PeerManager::timer_tick_occurred
@@ -56,6 +58,8 @@ extension Bindings {
 	/// However, as long as [`ChannelMonitor`] backups are sound, no funds besides those used for
 	/// unilateral chain closure fees are at risk.
 	///
+	/// [`ChannelManager`]: lightning::ln::channelmanager::ChannelManager
+	/// [`ChannelManager::timer_tick_occurred`]: lightning::ln::channelmanager::ChannelManager::timer_tick_occurred
 	/// [`ChannelMonitor`]: lightning::chain::channelmonitor::ChannelMonitor
 	/// [`Event`]: lightning::events::Event
 	/// [`PeerManager::timer_tick_occurred`]: lightning::ln::peer_handler::PeerManager::timer_tick_occurred

@@ -88,6 +88,29 @@ extension Bindings {
 			return returnValue
 		}
 
+		/// Creates a copy of the UnsignedInvoiceRequest
+		internal func clone() -> UnsignedInvoiceRequest {
+			// native call variable prep
+
+
+			// native method call
+			let nativeCallResult =
+				withUnsafePointer(to: self.cType!) { (origPointer: UnsafePointer<LDKUnsignedInvoiceRequest>) in
+					UnsignedInvoiceRequest_clone(origPointer)
+				}
+
+
+			// cleanup
+
+
+			// return value (do some wrapping)
+			let returnValue = UnsignedInvoiceRequest(
+				cType: nativeCallResult, instantiationContext: "UnsignedInvoiceRequest.swift::\(#function):\(#line)")
+
+
+			return returnValue
+		}
+
 		/// Returns the [`TaggedHash`] of the invoice to sign.
 		public func taggedHash() -> TaggedHash {
 			// native call variable prep
@@ -170,8 +193,6 @@ extension Bindings {
 		}
 
 		/// The minimum amount required for a successful payment of a single item.
-		///
-		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
 		public func amount() -> Amount? {
 			// native call variable prep
 
@@ -185,26 +206,13 @@ extension Bindings {
 
 			// cleanup
 
-			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
-			// Type group: RustStruct
-			// Type: LDKAmount
-
-			if nativeCallResult.inner == nil {
-				return nil
-			}
-
-			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
-			if pointerValue == 0 {
-				return nil
-			}
-
 
 			// return value (do some wrapping)
-			let returnValue = Amount(
+			let returnValue = Option_AmountZ(
 				cType: nativeCallResult, instantiationContext: "UnsignedInvoiceRequest.swift::\(#function):\(#line)",
 				anchor: self
 			)
-			.dangle(false)
+			.getValue()
 
 
 			return returnValue
@@ -212,7 +220,9 @@ extension Bindings {
 
 		/// A complete description of the purpose of the payment. Intended to be displayed to the user
 		/// but with the caveat that it has not been verified in any way.
-		public func description() -> PrintableString {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func description() -> PrintableString? {
 			// native call variable prep
 
 
@@ -224,6 +234,19 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustStruct
+			// Type: LDKPrintableString
+
+			if nativeCallResult.inner == nil {
+				return nil
+			}
+
+			let pointerValue = UInt(bitPattern: nativeCallResult.inner)
+			if pointerValue == 0 {
+				return nil
+			}
 
 
 			// return value (do some wrapping)
@@ -378,16 +401,16 @@ extension Bindings {
 			// return value (do some wrapping)
 			let returnValue = Quantity(
 				cType: nativeCallResult, instantiationContext: "UnsignedInvoiceRequest.swift::\(#function):\(#line)",
-				anchor: self
-			)
-			.dangle(false)
+				anchor: self)
 
 
 			return returnValue
 		}
 
 		/// The public key used by the recipient to sign invoices.
-		public func signingPubkey() -> [UInt8] {
+		///
+		/// Note that the return value (or a relevant inner pointer) may be NULL or all-0s to represent None
+		public func signingPubkey() -> [UInt8]? {
 			// native call variable prep
 
 
@@ -399,6 +422,15 @@ extension Bindings {
 
 
 			// cleanup
+
+			// COMMENT-DEDUCED OPTIONAL INFERENCE AND HANDLING:
+			// Type group: RustPrimitiveWrapper
+			// Type: LDKPublicKey
+
+			if nativeCallResult.compressed_form == Bindings.arrayToUInt8Tuple33(array: [UInt8](repeating: 0, count: 33))
+			{
+				return nil
+			}
 
 
 			// return value (do some wrapping)
@@ -653,6 +685,19 @@ extension Bindings {
 			return returnValue
 		}
 
+
+		internal func danglingClone() -> UnsignedInvoiceRequest {
+			let dangledClone = self.clone()
+			dangledClone.dangling = true
+			return dangledClone
+		}
+
+		internal func dynamicallyDangledClone() -> UnsignedInvoiceRequest {
+			let dangledClone = self.clone()
+			// if it's owned, i. e. controlled by Rust, it should dangle on our end
+			dangledClone.dangling = dangledClone.cType!.is_owned
+			return dangledClone
+		}
 
 		internal func setCFreeability(freeable: Bool) -> UnsignedInvoiceRequest {
 			self.cType!.is_owned = freeable
